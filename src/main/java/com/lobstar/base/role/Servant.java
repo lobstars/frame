@@ -174,8 +174,6 @@ public class Servant extends ServantEquipment {
 					}
 				}
 
-				// executor.execute(new DealWorkThread(searchHit));
-				// queue
 			} catch (Exception e) {
 				logger.error("", e);
 				throw new TaskeeperRuntimeException(e);
