@@ -111,6 +111,8 @@ public class MissionWindow {
 			try {
 				Map<String, Object> data = fetchTaskData(byteBuf);
 				data.put(Constant.VISITOR_TIME_SYMBOL, Utils.getSystemTime());
+				data.put(Constant.WORK_ASSIGN_SYMBOL, "true");
+		        data.put(Constant.WORK_DONE_SYMBOL, "false");
 				String type = null;
 				Object broadcast = data.get(Constant.WORK_DOMAIN_BROADCAST);
 				byte[] response = null;
@@ -119,7 +121,7 @@ public class MissionWindow {
 					
 					String string = master.getBroadcastQueue().response(id);
 					Map<String,Object> ret = new HashMap<String, Object>();
-					ret.put("return", string);
+					ret.put(Constant.WORK_RESPONSE_SYMBOL, string);
 					response = objectMapper.writeValueAsString(ret).getBytes();
 				}else {
 					synchronized (MissionWindow.this) {
