@@ -120,7 +120,7 @@ public class Servant extends ServantEquipment {
 				ConnectionState newState) {
 
 			logger.info("zk connection state changed : " + newState);
-			if (newState == ConnectionState.LOST) {
+			if (newState == ConnectionState.LOST || newState == ConnectionState.RECONNECTED) {
 				while (true) {
 					try {
 						Servant.this.getZookeeperClient()
