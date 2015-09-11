@@ -1,5 +1,6 @@
 package com.lobstar.index;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -51,6 +52,8 @@ public class QueryTools {
 
 	private static Settings settings = ImmutableSettings.settingsBuilder()
 			.put("number_of_replicas", 1).build();
+	
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
 	/**
 	 * 生成当天索引
@@ -79,8 +82,8 @@ public class QueryTools {
 
 			dumpIndex(client, index, Constant.DUMP_INDEX_NAME,
 					Constant.DUMP_TYPE_NAME, 2000);
-			client.prepareDeleteByQuery(index)
-					.setQuery(QueryBuilders.matchAllQuery()).get();
+//			client.prepareDeleteByQuery(index)
+//					.setQuery(QueryBuilders.matchAllQuery()).get();
 
 			LOG.info("dump index:" + index + "  finish!");
 
@@ -216,19 +219,14 @@ public class QueryTools {
 	 * @param id
 	 *            id
 	 * @param data
-	 *            替换的值，类似于先删除再添加
+	 *            替换的值
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
 	public static void updateIndexData(Client client, String index,
 			String type, String id, Map<String, Object> data) {
-		Map<String, Object> source = new GetRequestBuilder(client)
-				.setIndex(index).setType(type).setId(id).get().getSource();
-		if (source != null) {
-			source.putAll(data);
-		}
-		new IndexRequestBuilder(client).setSource(source).setIndex(index)
-				.setType(type).setId(id).execute();
+		
+		client.prepareUpdate(index, type, id).setDoc(data).setRetryOnConflict(5).get();
 
 		refreshIndices(client, index);
 	}
@@ -464,7 +462,13 @@ public class QueryTools {
 	}
 
 	public static String transferTime(Long time) {
-		return String.valueOf(time / 86400000 * 86400000);
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(time);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		return String.valueOf(calendar.getTimeInMillis());
 	}
 
 }

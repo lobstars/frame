@@ -1,6 +1,7 @@
 package com.lobstar.index;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -263,7 +264,13 @@ public class FilterTools {
     }
 
     public static String transferTime(Long time) {
-        return String.valueOf(time / 86400000 * 86400000);
-    }
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(time);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		return String.valueOf(calendar.getTimeInMillis());
+	}
 
 }

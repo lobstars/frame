@@ -91,7 +91,7 @@ public class Servant extends ServantEquipment {
 		cacheSet = new ConcurrentLinkedQueue<String>();
 	}
 
-	public void joinPark() {
+	public void join() {
 		try {
 			this.getZookeeperClient()
 					.create()
@@ -209,7 +209,9 @@ public class Servant extends ServantEquipment {
 				Map<String, Object> data = searchHit.getSource();
 				Map<String, Object> map = new HashMap<String, Object>();
 				ServantContext sct = ServantContext.getInstance();
+				sct.setClient(getRepositoryClient());
 				sct.setMap(map);
+				sct.setSearchHit(searchHit);
 				Long nowTime = System.currentTimeMillis();
 				Object visitTimeObj = data
 						.get(Constant.VISITOR_TIME_SYMBOL);
@@ -222,9 +224,9 @@ public class Servant extends ServantEquipment {
 				Long timeSpan = nowTime - visitTime;
 				try {
 					if (data.get("__testConnect") != null) {
-						map.put(Constant.WORK_DONE_SYMBOL, "true");
-						map.put(Constant.WORK_RESPONSE_SYMBOL, "success");
-						map.put(Constant.WORK_TIME_SPAN, timeSpan);
+//						map.put(Constant.WORK_DONE_SYMBOL, "true");
+//						map.put(Constant.WORK_RESPONSE_SYMBOL, "success");
+//						map.put(Constant.WORK_TIME_SPAN, timeSpan);
 					} else {
 
 						Object timeout = data
@@ -237,7 +239,10 @@ public class Servant extends ServantEquipment {
 												.get(Constant.WORK_TIMEOUT_IGNORE))) {
 							Object ret = handler.doAssignWorks(sct, data);
 							map.put(Constant.WORK_DONE_SYMBOL, "true");
-							map.put(Constant.WORK_RESPONSE_SYMBOL, ret);
+							if(!"true".equals(data.get(Constant.WORK_RESPONSE_IGNORE))) {
+								map.put(Constant.WORK_RESPONSE_SYMBOL,
+										ret);									
+							}
 						} else {
 
 							long threshold = Constant.WORK_TIME_SPAN_MAX;
@@ -253,14 +258,13 @@ public class Servant extends ServantEquipment {
 							if (timeSpan <= threshold) {
 								Object ret = handler.doAssignWorks(sct, data);
 								map.put(Constant.WORK_DONE_SYMBOL, "true");
-								map.put(Constant.WORK_RESPONSE_SYMBOL,
-										ret);
+								if(!"true".equals(data.get(Constant.WORK_RESPONSE_IGNORE))) {
+									map.put(Constant.WORK_RESPONSE_SYMBOL,
+											ret);									
+								}
 							} else {
 								map.put(Constant.WORK_DONE_SYMBOL,
 										"error");
-								map.put(Constant.WORK_RESPONSE_SYMBOL,
-										"time out ! visit time:" + visitTime
-												+ " and deal time:" + nowTime);
 							}
 						}
 						map.put(Constant.WORK_TIME_SPAN, timeSpan);
@@ -268,9 +272,9 @@ public class Servant extends ServantEquipment {
 
 				} catch (Exception e) {
 					map.put(Constant.WORK_DONE_SYMBOL, "error");
-					map.put(Constant.WORK_RESPONSE_SYMBOL, "name:"
-							+ getId() + ";get exception:" + e.getMessage());
-					map.put(Constant.WORK_EXCEPTION, e);
+//					map.put(Constant.WORK_RESPONSE_SYMBOL, "name:"
+//							+ getId() + ";get exception:" + e.getMessage());
+					map.put(Constant.WORK_EXCEPTION, e.getMessage());
 					map.put(Constant.WORK_EXCEPTION_STACK,
 							ExceptionTools.getExceptionStack(e));
 					map.put(Constant.WORK_TIME_SPAN, timeSpan);
@@ -295,7 +299,7 @@ public class Servant extends ServantEquipment {
 					logger.error(e.getMessage(), e);
 					throw new TaskeeperRuntimeException(e);
 				} finally {
-					if (cacheSet.size() > 1000) {
+					if (cacheSet.size() > 5000) {
 						cacheSet.poll();
 					}
 

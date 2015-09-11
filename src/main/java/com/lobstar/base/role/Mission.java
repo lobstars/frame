@@ -6,6 +6,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -16,6 +17,7 @@ import java.nio.charset.Charset;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -38,6 +40,8 @@ public class Mission {
     private int port;
     
     private boolean isSubmit = false;
+    private boolean isResponse = false;
+    private CountDownLatch latch;
 
     private NioEventLoopGroup nioEventLoopGroup;
     private Bootstrap bootstrap;
@@ -95,6 +99,7 @@ public class Mission {
         data.put(Constant.WORK_DONE_SYMBOL, isDone);
         data.put(Constant.VISITOR_TIMEZONE_SYMBOL, Calendar.getInstance().getTimeZone().getID());
         connect = bootstrap.connect(new InetSocketAddress(host, port)).sync();
+        latch = new CountDownLatch(1);
         isSubmit = true;
     }
 
@@ -164,6 +169,26 @@ public class Mission {
         close();
         return response;
     }
+    
+    public Object getReturnValue() throws Exception {
+    	latch.await();
+    	return retMap.get(Constant.WORK_RESPONSE_SYMBOL);    		
+    }
+    
+    public Object getReturnError() throws Exception{
+    	latch.await();
+    	return retMap.get(Constant.WORK_EXCEPTION);
+    }
+        
+    @Deprecated
+    public Object getReturnValue(int tryNum, int sleeptime) {
+    	Object response = getResponse(tryNum, sleeptime);
+    	Map<String,Object> returnMap = (Map<String,Object>)response;
+    	if(returnMap != null) {
+    		return returnMap.get(Constant.WORK_RESPONSE_SYMBOL);    		
+    	}
+    	return null;
+    }
 
     private class SendDataHandler extends ChannelInboundHandlerAdapter {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -190,6 +215,8 @@ public class Mission {
                 Map<String, Object> data = objectMapper.readValue(
                         new String(by, Charset.forName(Constant.GLOBAL_CHARSET)), Map.class);
                 retMap = data;
+                latch.countDown();
+                isResponse = true;
             } finally {
                 ret.release();
                 ctx.close();

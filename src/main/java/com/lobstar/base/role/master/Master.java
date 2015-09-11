@@ -140,6 +140,7 @@ public class Master extends ServantEquipment {
                             Map<String, Object> extraData = new HashMap<String, Object>();
                             extraData.put(Constant.WORK_UNDO_SYMBOL, "true");
                             extraData.put(Constant.WORK_ASSIGN_SYMBOL, "true");
+                            extraData.put(Constant.WORK_ASSIGN_SYMBOL, "false");
                             QueryTools.moveIndexData(getRepositoryClient(), QueryTools.getDailyIndex(), workerName,
                                     Constant.WORK_NOT_ASSIGN_TYPE,
                                     QueryGenerator.generateQuery(Constant.WORK_DONE_SYMBOL + "=false"), extraData);

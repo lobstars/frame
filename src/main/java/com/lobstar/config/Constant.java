@@ -26,6 +26,10 @@ public class Constant {
     public final static String WORK_NOT_ASSIGN_TYPE = "_no_assign";
 
     public final static String WORK_RESPONSE_SYMBOL = "_return";
+    
+    public final static String WORK_RESPONSE_ASYNC_SYMBOL = "_async_return";
+    
+    public final static String WORK_RESPONSE_IGNORE = "_return_ignore";
 
     //标识作用
     public final static String WORK_DOMAIN_SYMBOL = "_domain";

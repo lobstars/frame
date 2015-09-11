@@ -175,9 +175,9 @@ public class MissionWindow {
 			try {
 				Map<String, Object> retSource = QueryTools.getIndexAndTypeById(client, index, id);
 				if (retSource != null) {
-					Object retObj = retSource.get(Constant.WORK_RESPONSE_SYMBOL);
+					Object retObj = retSource.get(Constant.WORK_DONE_SYMBOL);
 
-					if (retObj != null) {
+					if (!"false".equals(retObj)) {
 						String jsonData = objectMapper.writeValueAsString(retSource);
 						byte[] retBytes = jsonData.toString().getBytes(
 								Charset.forName(Constant.GLOBAL_CHARSET));

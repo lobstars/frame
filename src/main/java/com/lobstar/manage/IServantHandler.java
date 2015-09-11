@@ -7,4 +7,11 @@ import com.lobstar.context.ServantContext;
 public interface IServantHandler {
 
     public Object doAssignWorks(ServantContext sc,Map<String, Object> source) throws Exception;
+
+//    public void doAssignWorksSyn(ServantContext sc,Map<String, Object> source,IServantHandler.CallBack callback) throws Exception;
+//
+//    interface CallBack {
+//    	public void callback();
+//    }
+
 }
