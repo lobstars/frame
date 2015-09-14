@@ -131,8 +131,7 @@ public class MissionWindow {
 					if (type != null) {
 						String index = QueryTools.getDailyIndex();
 						String id = addTask(index, type, data);
-						response = fetchTaskResponse(index, id);
-						
+						response = fetchTaskResponse(index, id);					
 					}
 				}
 				if (response != null) {
@@ -176,7 +175,8 @@ public class MissionWindow {
 				Map<String, Object> retSource = QueryTools.getIndexAndTypeById(client, index, id);
 				if (retSource != null) {
 					Object retObj = retSource.get(Constant.WORK_DONE_SYMBOL);
-
+					retSource.put(Constant.WORK_RESPSONSE_ASYNC_TASK_ID, id);
+					retSource.put(Constant.WORK_RESPSONSE_ASYNC_TASK_INDEX, index);
 					if (!"false".equals(retObj)) {
 						String jsonData = objectMapper.writeValueAsString(retSource);
 						byte[] retBytes = jsonData.toString().getBytes(

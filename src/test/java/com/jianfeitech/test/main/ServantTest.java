@@ -35,7 +35,7 @@ public class ServantTest {
                     return ret;
                 }
             });
-            baseServant.joinPark();
+            baseServant.join();
         } catch (Exception e) {
             if (baseServant != null) {
                 baseServant.close();

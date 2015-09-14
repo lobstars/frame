@@ -26,6 +26,7 @@ public class MasterMain {
             baseParkKeeper.initTicket(l, 10888);
             baseParkKeeper.tryBeKeeper();
         } catch (Exception e) {
+        	e.printStackTrace();
             if (baseParkKeeper != null) {
                 baseParkKeeper.close();
             }

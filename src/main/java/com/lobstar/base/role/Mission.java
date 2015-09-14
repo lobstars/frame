@@ -40,7 +40,7 @@ public class Mission {
     private int port;
     
     private boolean isSubmit = false;
-    private boolean isResponse = false;
+    private boolean ansyn = false;
     private CountDownLatch latch;
 
     private NioEventLoopGroup nioEventLoopGroup;
@@ -90,7 +90,7 @@ public class Mission {
     public void setData(Map<String, Object> data) {
         this.data = data;
     }
-
+    
     public void submit() throws InterruptedException {
         if (data == null) {
             data = new HashMap<String, Object>();
@@ -216,7 +216,6 @@ public class Mission {
                         new String(by, Charset.forName(Constant.GLOBAL_CHARSET)), Map.class);
                 retMap = data;
                 latch.countDown();
-                isResponse = true;
             } finally {
                 ret.release();
                 ctx.close();
@@ -242,6 +241,14 @@ public class Mission {
 
 	public boolean isSubmit() {
 		return isSubmit;
+	}
+
+	public boolean isAnsyn() {
+		return ansyn;
+	}
+
+	public void setAnsyn(boolean ansyn) {
+		this.ansyn = ansyn;
 	}
 
     

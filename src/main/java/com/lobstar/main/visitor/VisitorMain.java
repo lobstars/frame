@@ -46,15 +46,12 @@ public class VisitorMain {
             List<String> param = new ArrayList<String>();
             param.add("p1");
             param.add("p3");
-            data.put("symbol", "aa");
+            data.put("symbol", "xxx");
             data.put("phone", "18510867941");
-            data.put("code", "kkk");
-            data.put("signature", "汉字");
+            data.put("code", "xx");
             data.put("action","send");
             data.put("temp_params", param);
-//            data.put("_return_ignore", "true");
-//            data.put("action", "update_config");
-//            data.put("_broadcast_", "true");
+            data.put("signature", "汉字");
             Mission visitor = new Mission("115.28.9.13", 10888);
             visitor.setData(data);
             System.out.println("send "+index);
@@ -72,13 +69,6 @@ public class VisitorMain {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-            
-//            long timeMillis2 = System.currentTimeMillis();
-            //Object response = visitor.getResponse(1000, 10);
-//            long timeMillis3 = System.currentTimeMillis();
-//
-//            long t = timeMillis2 - timeMillis1;
-//            System.out.println(index+"--"+(timeMillis3-timeMillis2));
             visitor.close();
     	}
     }
