@@ -54,8 +54,8 @@ public class ServantMain {
                 }
             });
            
-//            baseServant.join();
-            
+            baseServant.join();
+            System.out.println("---------->");
         } catch (Exception e) {
         	logger.error("",e);
             if (baseServant != null) {

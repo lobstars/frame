@@ -38,6 +38,10 @@ public class Constant {
     //标识作用
     public final static String WORK_DOMAIN_SYMBOL = "_domain";
     
+    public final static String WORK_CUSTOM_DOMAIN_DEFALUT = "_domain_default";
+    
+    public final static String WORK_SERVANT_NAME = "_servant_name";
+    
     public final static String WORK_DOMAIN_BROADCAST = "_broadcast_";
     //标识地域
     public final static String WORK_REGION_SYMBOL = "_region";
@@ -67,4 +71,8 @@ public class Constant {
     public static final int MASTER_POLL_INTERVAL = 200;
     
     public static final int MASTER_TICKET_WINDOW_THREAD_SIZE = 300;
+    
+    public static final String SYSTEM_SERVANT_MANAGER = "manage_system_servant";
+
+    public static final String SYSTEM_SERVANT_STATUS = "status_system_servant";
 }

@@ -40,7 +40,7 @@ public class Mission {
     private int port;
     
     private boolean isSubmit = false;
-    private boolean ansyn = false;
+    private boolean async = false;
     private CountDownLatch latch;
 
     private NioEventLoopGroup nioEventLoopGroup;
@@ -243,12 +243,12 @@ public class Mission {
 		return isSubmit;
 	}
 
-	public boolean isAnsyn() {
-		return ansyn;
+	public boolean isAsync() {
+		return async;
 	}
 
-	public void setAnsyn(boolean ansyn) {
-		this.ansyn = ansyn;
+	public void setAsync(boolean async) {
+		this.async = async;
 	}
 
     

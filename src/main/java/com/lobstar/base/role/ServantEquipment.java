@@ -2,6 +2,9 @@ package com.lobstar.base.role;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -15,6 +18,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
 import com.lobstar.base.exception.TaskeeperBuilderException;
 import com.lobstar.config.BuildConfiguration;
+import com.lobstar.config.Builder;
 import com.lobstar.config.Constant;
 
 public class ServantEquipment implements Closeable {
@@ -23,6 +27,10 @@ public class ServantEquipment implements Closeable {
     private CuratorFramework zookeeperClient;
 
     private String id;
+    
+    private List<String> systemServants = Arrays.asList(new String[]{
+    		Constant.SYSTEM_SERVANT_MANAGER,Constant.SYSTEM_SERVANT_STATUS
+    });
 
     public ServantEquipment() {
     }
@@ -59,6 +67,18 @@ public class ServantEquipment implements Closeable {
                 retryPolicy);
         zookeeperClient.start();
     }
+    
+    public ServantEquipment(String id , Builder builder) {
+    	setId(id);
+        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.sniff", true)
+                .put("cluster.name", builder.getProperties(Builder.INDEX_NAME)).build();
+        repositoryClient = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(builder.getProperties(Builder.INDEX_HOST), Integer.parseInt(builder.getProperties(Builder.INDEX_PORT))));
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(100, 1);
+        zookeeperClient = CuratorFrameworkFactory.newClient(builder.getProperties(Builder.ZOOKEEPER_HOST) + ":" + builder.getProperties(Builder.ZOOKEEPER_PORT),
+                retryPolicy);
+        zookeeperClient.start();
+    }
+    
 
     @Override
     public void close() throws IOException {
@@ -91,8 +111,10 @@ public class ServantEquipment implements Closeable {
     }
 
     public void setId(String id) {
-    	if(id.startsWith("_")) {
-    		throw new TaskeeperBuilderException("rule name valid");
+    	if(id.contains("_")) {
+    		if(!systemServants.contains(id)) {
+    			throw new TaskeeperBuilderException("rule name valid");    			    			
+    		}
     	}
         this.id = id;
     }

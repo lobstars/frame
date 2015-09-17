@@ -20,16 +20,17 @@ public class VisitorMain {
 
     public static void main(String[] args) throws Exception {
     	
-    	ExecutorService pool = Executors.newFixedThreadPool(1);
+    	ExecutorService pool = Executors.newFixedThreadPool(200);
         
 
         //        while (true) {
         for (int i = 0; i <1; i++) {
         	pool.execute(new VisitorMain().new Task(i));
-        	if(i%20 == 0) {
-        		Thread.sleep(200);
-        	}
+//        	if(i%100 == 0) {
+//        		Thread.sleep(200);
+//        	}
         }
+        System.out.println("done");
         pool.shutdown();
     }
 
@@ -46,15 +47,15 @@ public class VisitorMain {
             List<String> param = new ArrayList<String>();
             param.add("p1");
             param.add("p3");
-            data.put("symbol", "xxx");
-            data.put("phone", "18510867941");
-            data.put("code", "xx");
+            data.put("symbol", "0053");
+            data.put("phone", "1020030"+index);
+            data.put("code", "1111");
             data.put("action","send");
+            data.put("_domain", "_manage");
             data.put("temp_params", param);
-            data.put("signature", "汉字");
-            Mission visitor = new Mission("115.28.9.13", 10888);
+            Mission visitor = new Mission("127.0.0.1", 10888);
             visitor.setData(data);
-            System.out.println("send "+index);
+            //System.out.println("send "+index);
             final long timeMillis1 = System.currentTimeMillis();
             try {
             	visitor.submit();

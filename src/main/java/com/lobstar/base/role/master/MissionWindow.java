@@ -49,6 +49,15 @@ public class MissionWindow {
 				Map<String, CopyOnWriteArrayList<String>> domainWorkerMap) {
 			if (source != null) {
 				Object domain = source.get(Constant.WORK_DOMAIN_SYMBOL);
+				 Object workName = source.get(Constant.WORK_SERVANT_NAME);
+	                if(workName != null) {
+	                	String name = workName.toString();
+	                	for (String worker : workerSet) {
+							if(name.equals(worker)) {
+								return worker;
+							}
+						}
+	                }
 				if (domain != null) {
 					if (domainWorkerMap.containsKey(domain)
 							&& domainWorkerMap.get(domain).size() > 0) {
@@ -59,9 +68,13 @@ public class MissionWindow {
 					}
 				}
 			}
-			int label = Math.abs(source.hashCode() % workerSet.size());
-			String type = workerSet.get(label);
-			return type;
+			CopyOnWriteArrayList<String> customServants = domainWorkerMap.get(Constant.WORK_CUSTOM_DOMAIN_DEFALUT);
+			if(customServants != null) {
+				int label = Math.abs(source.hashCode() % domainWorkerMap.get(Constant.WORK_CUSTOM_DOMAIN_DEFALUT).size());
+				String type = domainWorkerMap.get(Constant.WORK_CUSTOM_DOMAIN_DEFALUT).get(label);
+				return type;				
+			}
+			return null;
 		}
 	};
 
@@ -124,14 +137,19 @@ public class MissionWindow {
 					ret.put(Constant.WORK_RESPONSE_SYMBOL, string);
 					response = objectMapper.writeValueAsString(ret).getBytes();
 				}else {
-					synchronized (MissionWindow.this) {
+//					synchronized (MissionWindow.this) {
 						type = distributionHandlerInNetty
-								.distribution(data, workerSet, domainWorkerMap);
-					}
+								.distribution(data, workerSet, domainWorkerMap);						
+//					}
 					if (type != null) {
 						String index = QueryTools.getDailyIndex();
 						String id = addTask(index, type, data);
 						response = fetchTaskResponse(index, id);					
+					}else {
+						Map<String,Object> ret = new HashMap<String, Object>();
+						ret.put(Constant.WORK_RESPONSE_SYMBOL, "error");
+						ret.put(Constant.WORK_EXCEPTION, "no work");
+						response = objectMapper.writeValueAsString(ret).getBytes();
 					}
 				}
 				if (response != null) {
