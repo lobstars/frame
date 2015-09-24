@@ -24,6 +24,8 @@ public class Builder {
 	
 	public static final String WINDOW_HOST = "taskeeper.window.host";
 	public static final String WINDOW_PORT = "taskeeper.window.port";
+	
+	public static final String WORK_REMAIN_TIME = "taskeeper.work_remain_time";
 	private static Logger LOG = XLogger.getLogger(Builder.class);
 	
 	private Properties properties;

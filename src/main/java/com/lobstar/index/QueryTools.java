@@ -502,5 +502,27 @@ public class QueryTools {
 		calendar.set(Calendar.MILLISECOND, 0);
 		return String.valueOf(calendar.getTimeInMillis());
 	}
+	
+	public static BulkProcessor buildProcessor(Client client,int tick) {
+		BulkProcessor processor = BulkProcessor.builder(client, new Listener() {
+
+			@Override
+			public void beforeBulk(long executionId, BulkRequest request) {
+
+			}
+			@Override
+			public void afterBulk(long executionId, BulkRequest request,
+					BulkResponse response) {
+
+			}
+			@Override
+			public void afterBulk(long executionId, BulkRequest request,
+					Throwable failure) {
+				LOG.error(executionId+":"+failure);
+			}
+
+		}).setBulkActions(tick).build();
+		return processor;
+	}
 
 }

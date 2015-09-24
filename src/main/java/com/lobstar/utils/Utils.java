@@ -6,11 +6,11 @@ public class Utils {
         return System.currentTimeMillis();
     }
     
-    public static String contact(String...strs) {
+    public static String contact(Object...strs) {
     	StringBuffer buffer = new StringBuffer();
     	if(strs != null) {
-    		for (String string : strs) {
-    			buffer.append(string);
+    		for (Object s : strs) {
+    			buffer.append(s);
     		}
     	}
     	return buffer.toString();    		
