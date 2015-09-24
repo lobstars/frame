@@ -30,7 +30,7 @@ public class StatusServant {
 			statusServant.setDomain(managerDomain);
 			statusServant.setHandler(new IServantHandler() {
 				@Override
-				public Object doAssignWorks(ServantContext sc, Map<String, Object> source)
+				public Map<String,Object> doAssignWorks(ServantContext sc, Map<String, Object> source)
 						throws Exception {
 					Object action = source.get(actionName);
 					System.out.println(action);

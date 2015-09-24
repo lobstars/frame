@@ -55,11 +55,13 @@ public class Servant extends ServantEquipment {
 	private IServantHandler handler = new IServantHandler() {
 
 		@Override
-		public Object doAssignWorks(ServantContext sc,
+		public Map<String,Object> doAssignWorks(ServantContext sc,
 				Map<String, Object> source) {
 
 			logger.info(source.toString());
-			return "success";
+			Map<String, Object> ret = new HashMap<String, Object>();
+			
+			return ret;
 		}
 	};
 

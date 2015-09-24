@@ -147,7 +147,6 @@ public class MissionWindow {
 						response = fetchTaskResponse(index, id);					
 					}else {
 						Map<String,Object> ret = new HashMap<String, Object>();
-						ret.put(Constant.WORK_RESPONSE_SYMBOL, "error");
 						ret.put(Constant.WORK_EXCEPTION, "no work");
 						response = objectMapper.writeValueAsString(ret).getBytes();
 					}

@@ -36,7 +36,7 @@ public class ServantMain {
             baseServant.setDomain(domain);
             baseServant.setHandler(new IServantHandler() {
                 @Override
-                public Object doAssignWorks(final ServantContext sc,Map<String, Object> source) {
+                public Map<String,Object> doAssignWorks(final ServantContext sc,Map<String, Object> source) {
                     new Thread(){
                     	public void run() {	
                     		try {
@@ -50,7 +50,7 @@ public class ServantMain {
 							}
                     	};
                     }.start();
-                    return "success";
+                    return new HashMap<String, Object>();
                 }
             });
            

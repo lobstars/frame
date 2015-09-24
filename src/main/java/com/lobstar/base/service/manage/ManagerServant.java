@@ -29,7 +29,7 @@ public class ManagerServant {
 			managerServant.setDomain(managerDomain);
 			managerServant.setHandler(new IServantHandler() {
 				@Override
-				public Object doAssignWorks(ServantContext sc, Map<String, Object> source)
+				public Map<String,Object> doAssignWorks(ServantContext sc, Map<String, Object> source)
 						throws Exception {
 					return null;
 				}
