@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.UUID;
 
 import com.lobstar.base.role.master.Master;
-import com.lobstar.config.BuildConfiguration;
 import com.lobstar.config.Builder;
 
 public class MasterMain {

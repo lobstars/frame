@@ -208,7 +208,7 @@ public class QueryTools {
 			Map<String, Object> data) {
 		IndexResponse response = new IndexRequestBuilder(client)
 				.setIndex(index).setType(type).setSource(data)
-				.setRefresh(false)
+				.setRefresh(true)
 				.get();
 		return response.getId();
 	}
@@ -217,7 +217,7 @@ public class QueryTools {
 			Map<String, Object> data) {
 		IndexResponse response = new IndexRequestBuilder(client)
 				.setIndex(index).setType(type).setId(id).setSource(data)
-				.setRefresh(false)
+				.setRefresh(true)
 				.get();
 		return response.getId();
 	}
@@ -257,7 +257,7 @@ public class QueryTools {
 			String type, String id, Map<String, Object> data) {
 		
 		client.prepareUpdate(index, type, id).setDoc(data).setRetryOnConflict(5)
-		.setRefresh(false)
+		.setRefresh(true)
 		.get();
 
 	}
@@ -399,12 +399,12 @@ public class QueryTools {
 		}
 		IndexRequestBuilder requestBuilder = new IndexRequestBuilder(client)
 				.setIndex(index).setType(targetType).setId(response.getId())
-				.setRefresh(false)
+				.setRefresh(true)
 				.setSource(source);
 
 		DeleteRequestBuilder deleteRequestBuilder = new DeleteRequestBuilder(
 				client).setIndex(index).setType(sourceType)
-				.setRefresh(false)
+				.setRefresh(true)
 				.setId(response.getId());
 
 		bulkRequestBuilder.add(requestBuilder).add(deleteRequestBuilder)
@@ -427,14 +427,14 @@ public class QueryTools {
 		for(String type : targetTypes) {
 			IndexRequestBuilder requestBuilder = new IndexRequestBuilder(client)
 			.setIndex(index).setType(type).setId(response.getId())
-			.setRefresh(false)
+			.setRefresh(true)
 			.setSource(source);	
 			bulkRequestBuilder.add(requestBuilder);
 		}
 
 		DeleteRequestBuilder deleteRequestBuilder = new DeleteRequestBuilder(
 				client).setIndex(index).setType(sourceType)
-				.setRefresh(false)
+				.setRefresh(true)
 				.setId(response.getId());
 
 		bulkRequestBuilder.add(deleteRequestBuilder)
@@ -472,12 +472,12 @@ public class QueryTools {
 				IndexRequestBuilder requestBuilder = new IndexRequestBuilder(
 						client).setIndex(index).setType(targetType)
 						.setId(searchHit.getId())
-						.setRefresh(false)
+						.setRefresh(true)
 						.setSource(source);
 				bulkRequestBuilder.add(requestBuilder);
 				DeleteRequestBuilder deleteRequestBuilder = new DeleteRequestBuilder(
 						client).setIndex(index).setType(sourceType)
-						.setRefresh(false)
+						.setRefresh(true)
 						.setId(searchHit.getId());
 				bulkRequestBuilder.add(deleteRequestBuilder);
 			}

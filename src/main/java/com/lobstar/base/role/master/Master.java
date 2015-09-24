@@ -264,6 +264,7 @@ public class Master extends ServantEquipment {
             cnxnFactory.configure(new InetSocketAddress(host,port),
                     60);
             cnxnFactory.startup(server);
+            initTicket(builder.getProperties(Builder.WINDOW_HOST),Integer.parseInt(builder.getProperties(Builder.WINDOW_PORT)));
 		}
 		setId(name);
 		if(builder.getProperties(Builder.INDEX_REFRESH_INTERVAL) != null) {
@@ -359,6 +360,7 @@ public class Master extends ServantEquipment {
 					Settings settings = ImmutableSettings.settingsBuilder()
 							.put("number_of_replicas", Master.this.indexReplicas)
 							.put("refresh_interval",Master.this.indexRefreshInterval)
+							.put("index.store.type","memory")
 							.build();
 					QueryTools.createDailyIndex(getRepositoryClient(),settings);
 				}
@@ -435,6 +437,7 @@ public class Master extends ServantEquipment {
 			Settings settings = ImmutableSettings.settingsBuilder()
 					.put("number_of_replicas", this.indexReplicas)
 					.put("refresh_interval",this.indexRefreshInterval)
+					.put("index.store.type","memory")
 					.build();
 			QueryTools.createDailyIndex(getRepositoryClient(),settings);
 		}
@@ -445,6 +448,7 @@ public class Master extends ServantEquipment {
 			Settings settings = ImmutableSettings.settingsBuilder()
 					.put("number_of_replicas", this.indexReplicas)
 					.put("refresh_interval",this.indexRefreshInterval)
+					.put("index.store.type","memory")
 					.build();
 			QueryTools.createIndex(getRepositoryClient(), nextIndex,settings);
 		}

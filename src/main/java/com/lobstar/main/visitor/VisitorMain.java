@@ -25,12 +25,12 @@ public class VisitorMain {
 
         //        while (true) {
         for (int i = 0; i <10000; i++) {
-        	if(i%20 == 0) {
-        		Thread.sleep(20);
-        	}
-        	if(i%35 == 0) {
-        		Thread.sleep(50);
-        	}
+//        	if(i%20 == 0) {
+//        		Thread.sleep(20);
+//        	}
+//        	if(i%35 == 0) {
+//        		Thread.sleep(50);
+//        	}
         	Map<String, Object> data = new HashMap<String, Object>();
             List<String> param = new ArrayList<String>();
             param.add("p1");
@@ -80,7 +80,7 @@ public class VisitorMain {
             data.put("action","send");
             data.put("_domain", "_status");
             data.put("temp_params", param);
-            Mission visitor = new Mission("127.0.0.1", 10888);
+            Mission visitor = new Mission("115.28.9.13", 10888);
             visitor.setData(data);
             //System.out.println("send "+index);
             final long timeMillis1 = System.currentTimeMillis();
