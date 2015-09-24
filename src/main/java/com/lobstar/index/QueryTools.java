@@ -75,6 +75,20 @@ public class QueryTools {
 		}
 	}
 
+	public static boolean createDailyIndex(Client client,Settings settings) {
+		try {
+			CreateIndexResponse response = new CreateIndexRequestBuilder(client
+					.admin().indices()).setSettings(settings)
+					.setIndex(transferTime(new Date().getTime())).execute()
+					.actionGet();
+			return response.isAcknowledged();
+
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+			return false;
+		}
+	}
+	
 	public static boolean backupIndex(Client client, String index) {
 
 		try {
@@ -153,6 +167,20 @@ public class QueryTools {
 			return false;
 		}
 	}
+	
+	public static boolean createIndex(Client client, String index,Settings settings) {
+		try {
+			CreateIndexResponse response = new CreateIndexRequestBuilder(client
+					.admin().indices()).setIndex(index).setSettings(settings)
+					.execute().actionGet();
+			LOG.info("create index:" + index);
+			return response.isAcknowledged();
+
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+			return false;
+		}
+	}
 
 	public static String getDailyIndex() {
 		return transferTime(Utils.getSystemTime());
@@ -179,16 +207,18 @@ public class QueryTools {
 	public static String insertIndex(Client client, String index, String type,
 			Map<String, Object> data) {
 		IndexResponse response = new IndexRequestBuilder(client)
-				.setIndex(index).setType(type).setSource(data).get();
-		refreshIndices(client, index);
+				.setIndex(index).setType(type).setSource(data)
+				.setRefresh(false)
+				.get();
 		return response.getId();
 	}
 	
 	public static String insertIndex(Client client, String index, String type,String id,
 			Map<String, Object> data) {
 		IndexResponse response = new IndexRequestBuilder(client)
-				.setIndex(index).setType(type).setId(id).setSource(data).get();
-		refreshIndices(client, index);
+				.setIndex(index).setType(type).setId(id).setSource(data)
+				.setRefresh(false)
+				.get();
 		return response.getId();
 	}
 	
@@ -226,9 +256,10 @@ public class QueryTools {
 	public static void updateIndexData(Client client, String index,
 			String type, String id, Map<String, Object> data) {
 		
-		client.prepareUpdate(index, type, id).setDoc(data).setRetryOnConflict(5).get();
+		client.prepareUpdate(index, type, id).setDoc(data).setRetryOnConflict(5)
+		.setRefresh(false)
+		.get();
 
-		refreshIndices(client, index);
 	}
 
 	/**
@@ -368,15 +399,16 @@ public class QueryTools {
 		}
 		IndexRequestBuilder requestBuilder = new IndexRequestBuilder(client)
 				.setIndex(index).setType(targetType).setId(response.getId())
+				.setRefresh(false)
 				.setSource(source);
 
 		DeleteRequestBuilder deleteRequestBuilder = new DeleteRequestBuilder(
 				client).setIndex(index).setType(sourceType)
+				.setRefresh(false)
 				.setId(response.getId());
 
 		bulkRequestBuilder.add(requestBuilder).add(deleteRequestBuilder)
 				.execute();
-		refreshIndices(client, index);
 	}
 	
 	public static void moveIndexData(Client client, String index,
@@ -395,17 +427,18 @@ public class QueryTools {
 		for(String type : targetTypes) {
 			IndexRequestBuilder requestBuilder = new IndexRequestBuilder(client)
 			.setIndex(index).setType(type).setId(response.getId())
+			.setRefresh(false)
 			.setSource(source);	
 			bulkRequestBuilder.add(requestBuilder);
 		}
 
 		DeleteRequestBuilder deleteRequestBuilder = new DeleteRequestBuilder(
 				client).setIndex(index).setType(sourceType)
+				.setRefresh(false)
 				.setId(response.getId());
 
 		bulkRequestBuilder.add(deleteRequestBuilder)
 				.execute();
-		refreshIndices(client, index);
 	}
 
 	public static void moveIndexData(Client client, String index,
@@ -438,10 +471,13 @@ public class QueryTools {
 				}
 				IndexRequestBuilder requestBuilder = new IndexRequestBuilder(
 						client).setIndex(index).setType(targetType)
-						.setId(searchHit.getId()).setSource(source);
+						.setId(searchHit.getId())
+						.setRefresh(false)
+						.setSource(source);
 				bulkRequestBuilder.add(requestBuilder);
 				DeleteRequestBuilder deleteRequestBuilder = new DeleteRequestBuilder(
 						client).setIndex(index).setType(sourceType)
+						.setRefresh(false)
 						.setId(searchHit.getId());
 				bulkRequestBuilder.add(deleteRequestBuilder);
 			}
@@ -456,10 +492,6 @@ public class QueryTools {
 
 	}
 
-	public static void refreshIndices(Client client, String... indices) {
-		new RefreshRequestBuilder(client.admin().indices()).setIndices(indices)
-				.execute();
-	}
 
 	public static String transferTime(Long time) {
 		Calendar calendar = Calendar.getInstance();

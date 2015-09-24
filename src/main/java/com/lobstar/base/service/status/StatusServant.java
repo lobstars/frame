@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.lobstar.base.role.Servant;
 import com.lobstar.base.service.manage.ManagerServant;
 import com.lobstar.config.BuildConfiguration;
+import com.lobstar.config.Builder;
 import com.lobstar.config.Constant;
 import com.lobstar.context.ServantContext;
 import com.lobstar.manage.IServantHandler;
@@ -19,15 +20,15 @@ public class StatusServant {
 	private static StatusServant ss;
 	
 	private static boolean active = false;
-	private final String managerServantName = Constant.SYSTEM_SERVANT_STATUS;
-	private final String managerDomain = "_status";
+	private final String statusServantName = Constant.SYSTEM_SERVANT_STATUS;
+	private final String statusDomain = "_status";
 	private final String actionName = "action";
 	private static Servant statusServant;
 	
 	private StatusServant(){
 		try {
-			statusServant = new Servant(managerServantName, new BuildConfiguration().buildConfig());
-			statusServant.setDomain(managerDomain);
+			statusServant = new Servant(statusServantName, new Builder().buildConfig());
+			statusServant.setDomain(statusDomain);
 			statusServant.setHandler(new IServantHandler() {
 				@Override
 				public Map<String,Object> doAssignWorks(ServantContext sc, Map<String, Object> source)

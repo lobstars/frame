@@ -20,6 +20,8 @@ public class Builder {
 	public static final String INDEX_HOST = "taskeeper.index.host";
 	public static final String INDEX_PORT = "taskeeper.index.port";
 	public static final String INDEX_NAME = "taskeeper.index.cluster.name";
+	public static final String INDEX_REFRESH_INTERVAL = "taskeeper.index.refresh_interval";
+	public static final String INDEX_REPLICAS = "taskeeper.index.replicas";
 	
 	public static final String WINDOW_HOST = "taskeeper.window.host";
 	public static final String WINDOW_PORT = "taskeeper.window.port";

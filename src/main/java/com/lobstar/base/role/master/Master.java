@@ -77,6 +77,9 @@ public class Master extends ServantEquipment {
 	private int ticketPort = Constant.TICKET_PORT;
 
 	private Timer dumpTimer = new Timer("dumper");
+	
+	private String indexRefreshInterval = "1s";
+	private int indexReplicas = 0;
 
 	private ScheduledExecutorService poolExecutor = (ScheduledThreadPoolExecutor) Executors
 			.newScheduledThreadPool(1);
@@ -263,6 +266,12 @@ public class Master extends ServantEquipment {
             cnxnFactory.startup(server);
 		}
 		setId(name);
+		if(builder.getProperties(Builder.INDEX_REFRESH_INTERVAL) != null) {
+			this.indexRefreshInterval = builder.getProperties(Builder.INDEX_REFRESH_INTERVAL);			
+		}
+		if(builder.getProperties(Builder.INDEX_REPLICAS) != null) {
+			this.indexReplicas = Integer.parseInt(builder.getProperties(Builder.INDEX_REPLICAS));
+		}
         Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.sniff", true)
                 .put("cluster.name", builder.getProperties(Builder.INDEX_NAME)).build();
         setRepositoryClient( new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(builder.getProperties(Builder.INDEX_HOST), Integer.parseInt(builder.getProperties(Builder.INDEX_PORT)))));
@@ -347,7 +356,11 @@ public class Master extends ServantEquipment {
 				String dailyIndex = QueryTools.getDailyIndex();
 
 				if (!QueryTools.isIndexExist(getRepositoryClient(), dailyIndex)) {
-					QueryTools.createDailyIndex(getRepositoryClient());
+					Settings settings = ImmutableSettings.settingsBuilder()
+							.put("number_of_replicas", Master.this.indexReplicas)
+							.put("refresh_interval",Master.this.indexRefreshInterval)
+							.build();
+					QueryTools.createDailyIndex(getRepositoryClient(),settings);
 				}
 
 				SearchResponse response = QueryTools.searchIndexAndType(
@@ -419,13 +432,21 @@ public class Master extends ServantEquipment {
 		String dailyIndex = QueryTools.getDailyIndex();
 
 		if (!QueryTools.isIndexExist(getRepositoryClient(), dailyIndex)) {
-			QueryTools.createDailyIndex(getRepositoryClient());
+			Settings settings = ImmutableSettings.settingsBuilder()
+					.put("number_of_replicas", this.indexReplicas)
+					.put("refresh_interval",this.indexRefreshInterval)
+					.build();
+			QueryTools.createDailyIndex(getRepositoryClient(),settings);
 		}
 
 		String nextIndex = QueryTools.getNextDayIndex();
 
 		if (!QueryTools.isIndexExist(getRepositoryClient(), nextIndex)) {
-			QueryTools.createIndex(getRepositoryClient(), nextIndex);
+			Settings settings = ImmutableSettings.settingsBuilder()
+					.put("number_of_replicas", this.indexReplicas)
+					.put("refresh_interval",this.indexRefreshInterval)
+					.build();
+			QueryTools.createIndex(getRepositoryClient(), nextIndex,settings);
 		}
 	}
 
