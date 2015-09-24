@@ -78,7 +78,6 @@ public class Master extends ServantEquipment {
 
 	private Timer dumpTimer = new Timer("dumper");
 	
-	private String indexRefreshInterval = "1s";
 	private int indexReplicas = 0;
 
 	private ScheduledExecutorService poolExecutor = (ScheduledThreadPoolExecutor) Executors
@@ -267,9 +266,6 @@ public class Master extends ServantEquipment {
             initTicket(builder.getProperties(Builder.WINDOW_HOST),Integer.parseInt(builder.getProperties(Builder.WINDOW_PORT)));
 		}
 		setId(name);
-		if(builder.getProperties(Builder.INDEX_REFRESH_INTERVAL) != null) {
-			this.indexRefreshInterval = builder.getProperties(Builder.INDEX_REFRESH_INTERVAL);			
-		}
 		if(builder.getProperties(Builder.INDEX_REPLICAS) != null) {
 			this.indexReplicas = Integer.parseInt(builder.getProperties(Builder.INDEX_REPLICAS));
 		}
@@ -359,7 +355,6 @@ public class Master extends ServantEquipment {
 				if (!QueryTools.isIndexExist(getRepositoryClient(), dailyIndex)) {
 					Settings settings = ImmutableSettings.settingsBuilder()
 							.put("number_of_replicas", Master.this.indexReplicas)
-							.put("refresh_interval",Master.this.indexRefreshInterval)
 							.put("index.store.type","memory")
 							.build();
 					QueryTools.createDailyIndex(getRepositoryClient(),settings);
@@ -436,7 +431,6 @@ public class Master extends ServantEquipment {
 		if (!QueryTools.isIndexExist(getRepositoryClient(), dailyIndex)) {
 			Settings settings = ImmutableSettings.settingsBuilder()
 					.put("number_of_replicas", this.indexReplicas)
-					.put("refresh_interval",this.indexRefreshInterval)
 					.put("index.store.type","memory")
 					.build();
 			QueryTools.createDailyIndex(getRepositoryClient(),settings);
@@ -447,7 +441,6 @@ public class Master extends ServantEquipment {
 		if (!QueryTools.isIndexExist(getRepositoryClient(), nextIndex)) {
 			Settings settings = ImmutableSettings.settingsBuilder()
 					.put("number_of_replicas", this.indexReplicas)
-					.put("refresh_interval",this.indexRefreshInterval)
 					.put("index.store.type","memory")
 					.build();
 			QueryTools.createIndex(getRepositoryClient(), nextIndex,settings);
