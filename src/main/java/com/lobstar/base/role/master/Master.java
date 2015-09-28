@@ -135,7 +135,7 @@ public class Master extends ServantEquipment {
 
 			try {
 				workerCache = new PathChildrenCache(client, WORKER_SYMBOL, true);
-				if(ticketWindow != null) {
+				if(ticketWindow == null) {
 					logger.info("taskeeper -> init mission window");
 					ticketWindow = new MissionWindow(Master.this, ticketHost,
 							ticketPort);					
