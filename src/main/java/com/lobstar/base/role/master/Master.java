@@ -1,7 +1,6 @@
 package com.lobstar.base.role.master;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -46,7 +45,6 @@ import com.lobstar.base.role.ServantEquipment;
 import com.lobstar.base.service.status.StatusServant;
 import com.lobstar.config.Builder;
 import com.lobstar.config.Constant;
-import com.lobstar.context.MasterContext;
 import com.lobstar.controller.IndexDumpTaskManager;
 import com.lobstar.index.QueryTools;
 import com.lobstar.manage.IDistributionHandler;
@@ -79,7 +77,6 @@ public class Master extends ServantEquipment {
 	private int ticketPort = Constant.TICKET_PORT;
 
 	private Timer dumpTimer = new Timer("dumper");
-	
 	
 	private int indexReplicas = 0;
 	
@@ -138,8 +135,13 @@ public class Master extends ServantEquipment {
 
 			try {
 				workerCache = new PathChildrenCache(client, WORKER_SYMBOL, true);
-				ticketWindow = new MissionWindow(Master.this, ticketHost,
-						ticketPort);
+				if(ticketWindow != null) {
+					logger.info("taskeeper -> init mission window");
+					ticketWindow = new MissionWindow(Master.this, ticketHost,
+							ticketPort);					
+				}else {
+					logger.info("taskeeper -> mission window already init");
+				}
 				workerCache.getListenable().addListener(
 						new PathChildrenCacheListener() {
 							@Override
@@ -221,14 +223,18 @@ public class Master extends ServantEquipment {
 						});
 				workerCache.start();
 				initIndex();
-				ticketWindow.open(getRepositoryClient());
+				if(!ticketWindow.isOpen()) {
+					ticketWindow.open(getRepositoryClient());					
+				}else {
+					logger.info("taskeeper -> mission window already opened");
+				}
 				broadcastQueue = new BroadcastQueue(getRepositoryClient());
 				broadcastQueue.start();
-				logger.info("master--->" + Master.this.getId()
+				logger.info("taskeeper -> master--->" + Master.this.getId()
 						+ "   ->   init!");
 				
 				StatusServant.startService();
-				logger.info("manage servant init -----> status servant start");
+				logger.info("taskeeper -> manage servant init -----> status servant start");
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 				if (workerCache != null) {
@@ -241,10 +247,7 @@ public class Master extends ServantEquipment {
 	private CountDownLatch closeLatch = new CountDownLatch(1);
 
 	/* -------------------------------Master()--------------------------------------------*/
-	
-	public Master() {
-	}
-	
+		
 	public Master(String name,Builder builder,boolean candidate) throws Exception{
 		setId(name);
 		initMaster(builder, candidate);
@@ -271,6 +274,14 @@ public class Master extends ServantEquipment {
 	public void initTicket(String ticketHost, int ticketPort) {
 		this.ticketHost = ticketHost;
 		this.ticketPort = ticketPort;
+	}
+	
+	public void openWindow() throws Exception{
+		if(ticketWindow != null) {
+			ticketWindow = new MissionWindow(Master.this, ticketHost,
+					ticketPort);			
+		}
+		ticketWindow.open(getRepositoryClient());
 	}
 
 	public void work() {

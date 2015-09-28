@@ -4,10 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class XLogger {
-
-
-
+public class XLogger{
+	
 
     public static Logger getLogger(Class<?> clazz) {
 

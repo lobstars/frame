@@ -19,6 +19,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.client.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.lobstar.config.Constant;
 import com.lobstar.index.QueryTools;
@@ -26,13 +28,14 @@ import com.lobstar.manage.IDistributionHandlerInNetty;
 import com.lobstar.utils.Utils;
 
 public class MissionWindow {
-
+	private static final Logger logger = LoggerFactory.getLogger(MissionWindow.class);
 	private Master master;
 	
-	private ServerBootstrap bootstrap;
+	private ServerBootstrap tcpServer;
 	private ObjectMapper objectMapper = new ObjectMapper();
 	private String host;
 	private int port = 0;
+	private boolean open = false;
 
 	private Client client;
 
@@ -82,9 +85,9 @@ public class MissionWindow {
 		EventLoopGroup parentGroup = new NioEventLoopGroup(
 				Constant.MASTER_TICKET_WINDOW_THREAD_SIZE);
 		EventLoopGroup childGroup = new NioEventLoopGroup(Constant.MASTER_TICKET_WINDOW_THREAD_SIZE);
-		this.bootstrap = new ServerBootstrap();
+		this.tcpServer = new ServerBootstrap();
 		ServerHandler serverHandler = new ServerHandler();
-		bootstrap.group(parentGroup, childGroup).channel(NioServerSocketChannel.class)
+		tcpServer.group(parentGroup, childGroup).channel(NioServerSocketChannel.class)
 				.childHandler(serverHandler).option(ChannelOption.SO_KEEPALIVE, true);
 	}
 
@@ -98,14 +101,15 @@ public class MissionWindow {
 	public void open(Client client) throws InterruptedException {
 		this.client = client;
 		if (this.host == null) {
-			bootstrap.bind(this.port).sync();
+			tcpServer.bind(this.port).sync();
 		} else {
 			if (this.port == 0) {
 				this.port = Constant.TICKET_PORT;
 			}
-			bootstrap.bind(this.host, this.port).sync();
+			tcpServer.bind(this.host, this.port).sync();
 		}
-
+		logger.info(Utils.contact("taskeeper -> mission window is opened in ",this.host,":",this.port));
+		setOpen(true);
 	}
 
 	private class ServerHandler extends ChannelInitializer<SocketChannel> {
@@ -207,6 +211,14 @@ public class MissionWindow {
 			}
 		}
 		return null;
+	}
+
+	public boolean isOpen() {
+		return open;
+	}
+
+	public void setOpen(boolean open) {
+		this.open = open;
 	}
 
 }

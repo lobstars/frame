@@ -24,6 +24,7 @@ public class MasterMain {
             if (master != null) {
                 master.close();
             }
+            System.exit(0);
         }
     }
 }

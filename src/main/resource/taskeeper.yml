@@ -1,0 +1,18 @@
+#basic config
+taskeeper.zookeeper.host: 127.0.0.1
+taskeeper.zookeeper.port: 12888
+taskeeper.zookeeper.tick: 1000
+taskeeper.zookeeper.snapDir: ./taskeeper_zookeeper/snap
+taskeeper.zookeeper.logDir: ./taskeeper_zookeeper/logDir
+
+taskeeper.index.host: 127.0.0.1
+taskeeper.index.port: 9307
+taskeeper.index.cluster.name: sms
+#taskeeper.index.refresh_interval: 1s
+
+#tick config
+#taskeeper.window.host: 127.0.0.1
+taskeeper.window.port: 10888
+
+#work
+taskeeper.work_remain_time: 35
