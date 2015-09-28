@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import com.lobstar.base.role.Servant;
 import com.lobstar.base.service.manage.ManagerServant;
-import com.lobstar.config.BuildConfiguration;
 import com.lobstar.config.Builder;
 import com.lobstar.config.Constant;
 import com.lobstar.context.ServantContext;
@@ -44,7 +43,7 @@ public class StatusServant {
 	}
 	
 	private static void activeServant() {
-		statusServant.join();
+		statusServant.work();
 	}
 	
 	

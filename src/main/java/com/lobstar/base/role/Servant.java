@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import com.lobstar.base.exception.ExceptionTools;
 import com.lobstar.base.exception.TaskeeperRuntimeException;
 import com.lobstar.base.log.XLogger;
-import com.lobstar.config.BuildConfiguration;
 import com.lobstar.config.Builder;
 import com.lobstar.config.Constant;
 import com.lobstar.context.ServantContext;
@@ -80,14 +79,15 @@ public class Servant extends ServantEquipment {
 		init();
 	}
 
-	public Servant(String id, BuildConfiguration config) {
-		super(id, config);
+	
+	public Servant(String id,Builder builder) {
+		super(id, builder);
 		initField();
 		init();
 	}
 	
-	public Servant(String id,Builder builder) {
-		super(id, builder);
+	public Servant(String id) throws Exception {
+		super(id);
 		initField();
 		init();
 	}
@@ -100,7 +100,7 @@ public class Servant extends ServantEquipment {
 		cacheSet = new ConcurrentLinkedQueue<String>();
 	}
 
-	public void join() {
+	public void work() {
 		try {
 			this.getZookeeperClient()
 					.create()

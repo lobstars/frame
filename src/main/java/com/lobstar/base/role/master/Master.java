@@ -1,6 +1,7 @@
 package com.lobstar.base.role.master;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -43,7 +44,6 @@ import com.lobstar.base.exception.TaskeeperBuilderException;
 import com.lobstar.base.log.XLogger;
 import com.lobstar.base.role.ServantEquipment;
 import com.lobstar.base.service.status.StatusServant;
-import com.lobstar.config.BuildConfiguration;
 import com.lobstar.config.Builder;
 import com.lobstar.config.Constant;
 import com.lobstar.context.MasterContext;
@@ -246,55 +246,20 @@ public class Master extends ServantEquipment {
 	}
 	
 	public Master(String name,Builder builder,boolean candidate) throws Exception{
-		if(!candidate) {
-			File snapDir = new File(builder.getProperties(Builder.ZOOKEEPER_SNAPDIR));
-			File logDir = new File(builder.getProperties(Builder.ZOOKEEPER_LOGDIR));
-			logger.info(Utils.contact("taskeeper -> zookeeper snap dir:",builder.getProperties(Builder.ZOOKEEPER_SNAPDIR)));
-			logger.info(Utils.contact("taskeeper -> zookeeper log dir:",builder.getProperties(Builder.ZOOKEEPER_LOGDIR)));
-			if(!snapDir.exists()) {
-				snapDir.mkdirs();
-			}
-			if(!logDir.exists()) {
-				logDir.mkdirs();
-			}
-			int tickTime = 1000;
-			String tick = builder.getProperties(Builder.ZOOKEEPER_TICK);
-			logger.info(Utils.contact("taskeeper -> zookeeper tick :",builder.getProperties(Builder.ZOOKEEPER_TICK)));
-			if(tick != null) {
-				tickTime = Integer.parseInt(tick);
-			}
-			String host = builder.getProperties(Builder.ZOOKEEPER_HOST);
-			int port = Integer.parseInt(builder.getProperties(Builder.ZOOKEEPER_PORT));
-			logger.info(Utils.contact("taskeeper -> zookeeper host :",builder.getProperties(Builder.ZOOKEEPER_HOST)));
-			logger.info(Utils.contact("taskeeper -> zookeeper port :",builder.getProperties(Builder.ZOOKEEPER_PORT)));
-			ZooKeeperServer server = new ZooKeeperServer(snapDir, logDir, tickTime);
-			ServerCnxnFactory cnxnFactory = ServerCnxnFactory.createFactory();
-            cnxnFactory.configure(new InetSocketAddress(host,port),
-                    60);
-            cnxnFactory.startup(server);
-            logger.info("taskeeper -> zookeeper start !");
-            logger.info(Utils.contact("taskeeper -> mission window host: ",builder.getProperties(Builder.WINDOW_HOST)));
-            logger.info(Utils.contact("taskeeper -> mission window port: ",builder.getProperties(Builder.WINDOW_PORT)));
-            initTicket(builder.getProperties(Builder.WINDOW_HOST),Integer.parseInt(builder.getProperties(Builder.WINDOW_PORT)));
-		}
 		setId(name);
-		if(builder.getProperties(Builder.INDEX_REPLICAS) != null) {
-			this.indexReplicas = Integer.parseInt(builder.getProperties(Builder.INDEX_REPLICAS));
-		}
-		 logger.info(Utils.contact("taskeeper -> index replicas: ",this.indexReplicas));
-		if(builder.getProperties(Builder.WORK_REMAIN_TIME) != null) {
-			this.remainTime = Integer.parseInt(builder.getProperties(Builder.WORK_REMAIN_TIME));
-		}
-		logger.info(Utils.contact("taskeeper -> index remian days: ",this.remainTime));
-        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.sniff", true)
-                .put("cluster.name", builder.getProperties(Builder.INDEX_NAME)).build();
-        logger.info(Utils.contact("taskeeper -> index cluster name: ",builder.getProperties(Builder.INDEX_NAME)));
-        logger.info(Utils.contact("taskeeper -> index cluster port: ",builder.getProperties(Builder.INDEX_PORT)));
-        setRepositoryClient( new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(builder.getProperties(Builder.INDEX_HOST), Integer.parseInt(builder.getProperties(Builder.INDEX_PORT)))));
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(100, 1);
-        setZookeeperClient(CuratorFrameworkFactory.newClient(builder.getProperties(Builder.ZOOKEEPER_HOST) + ":" + builder.getProperties(Builder.ZOOKEEPER_PORT),
-                retryPolicy));
-        getZookeeperClient().start();
+		initMaster(builder, candidate);
+	}
+	
+	public Master(String name) throws Exception{
+		setId(name);
+		Builder builder = new Builder().buildConfig();
+		initMaster(builder, false);
+	}
+	
+	public Master(String name,boolean candidate) throws Exception{
+		setId(name);
+		Builder builder = new Builder().buildConfig();
+		initMaster(builder, candidate);
 	}
 
 	public Master(String name, String connectString, Settings settings,
@@ -302,17 +267,13 @@ public class Master extends ServantEquipment {
 		super(name, connectString, settings, host, port);
 	}
 
-	public Master(String name, BuildConfiguration config) {
-		super(name, config);
-		initTicket(config.getTicketHost(), config.getTicketPort());
-	}
 
 	public void initTicket(String ticketHost, int ticketPort) {
 		this.ticketHost = ticketHost;
 		this.ticketPort = ticketPort;
 	}
 
-	public void tryBeKeeper() {
+	public void work() {
 		String uid = null;
 		if (ticketHost == null) {
 			try {
@@ -480,6 +441,58 @@ public class Master extends ServantEquipment {
 		calendar.set(Calendar.MILLISECOND, 0);
 
 		return calendar.getTime();
+	}
+	
+	private void initMaster(Builder builder,boolean candidate) throws Exception {
+		if(!candidate) {
+			File snapDir = new File(builder.getProperties(Builder.ZOOKEEPER_SNAPDIR));
+			File logDir = new File(builder.getProperties(Builder.ZOOKEEPER_LOGDIR));
+			logger.info(Utils.contact("taskeeper -> zookeeper snap dir:",builder.getProperties(Builder.ZOOKEEPER_SNAPDIR)));
+			logger.info(Utils.contact("taskeeper -> zookeeper log dir:",builder.getProperties(Builder.ZOOKEEPER_LOGDIR)));
+			if(!snapDir.exists()) {
+				snapDir.mkdirs();
+			}
+			if(!logDir.exists()) {
+				logDir.mkdirs();
+			}
+			int tickTime = 1000;
+			String tick = builder.getProperties(Builder.ZOOKEEPER_TICK);
+			logger.info(Utils.contact("taskeeper -> zookeeper tick :",builder.getProperties(Builder.ZOOKEEPER_TICK)));
+			if(tick != null) {
+				tickTime = Integer.parseInt(tick);
+			}
+			String host = builder.getProperties(Builder.ZOOKEEPER_HOST);
+			int port = Integer.parseInt(builder.getProperties(Builder.ZOOKEEPER_PORT));
+			logger.info(Utils.contact("taskeeper -> zookeeper host :",builder.getProperties(Builder.ZOOKEEPER_HOST)));
+			logger.info(Utils.contact("taskeeper -> zookeeper port :",builder.getProperties(Builder.ZOOKEEPER_PORT)));
+			ZooKeeperServer server = new ZooKeeperServer(snapDir, logDir, tickTime);
+			ServerCnxnFactory cnxnFactory = ServerCnxnFactory.createFactory();
+            cnxnFactory.configure(new InetSocketAddress(host,port),
+                    60);
+            cnxnFactory.startup(server);
+            logger.info("taskeeper -> zookeeper start !");
+            logger.info(Utils.contact("taskeeper -> mission window host: ",builder.getProperties(Builder.WINDOW_HOST)));
+            logger.info(Utils.contact("taskeeper -> mission window port: ",builder.getProperties(Builder.WINDOW_PORT)));
+            initTicket(builder.getProperties(Builder.WINDOW_HOST),Integer.parseInt(builder.getProperties(Builder.WINDOW_PORT)));
+		}
+		
+		if(builder.getProperties(Builder.INDEX_REPLICAS) != null) {
+			this.indexReplicas = Integer.parseInt(builder.getProperties(Builder.INDEX_REPLICAS));
+		}
+		 logger.info(Utils.contact("taskeeper -> index replicas: ",this.indexReplicas));
+		if(builder.getProperties(Builder.WORK_REMAIN_TIME) != null) {
+			this.remainTime = Integer.parseInt(builder.getProperties(Builder.WORK_REMAIN_TIME));
+		}
+		logger.info(Utils.contact("taskeeper -> index remian days: ",this.remainTime));
+        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.sniff", true)
+                .put("cluster.name", builder.getProperties(Builder.INDEX_NAME)).build();
+        logger.info(Utils.contact("taskeeper -> index cluster name: ",builder.getProperties(Builder.INDEX_NAME)));
+        logger.info(Utils.contact("taskeeper -> index cluster port: ",builder.getProperties(Builder.INDEX_PORT)));
+        setRepositoryClient( new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(builder.getProperties(Builder.INDEX_HOST), Integer.parseInt(builder.getProperties(Builder.INDEX_PORT)))));
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(100, 1);
+        setZookeeperClient(CuratorFrameworkFactory.newClient(builder.getProperties(Builder.ZOOKEEPER_HOST) + ":" + builder.getProperties(Builder.ZOOKEEPER_PORT),
+                retryPolicy));
+        getZookeeperClient().start();
 	}
 
 	public BroadcastQueue getBroadcastQueue() {

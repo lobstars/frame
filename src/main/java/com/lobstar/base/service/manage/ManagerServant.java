@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.lobstar.base.role.Servant;
-import com.lobstar.config.BuildConfiguration;
+import com.lobstar.config.Builder;
 import com.lobstar.config.Constant;
 import com.lobstar.context.ServantContext;
 import com.lobstar.manage.IServantHandler;
@@ -25,7 +25,7 @@ public class ManagerServant {
 	
 	private ManagerServant(){
 		try {
-			managerServant = new Servant(managerServantName, new BuildConfiguration().buildConfig());
+			managerServant = new Servant(managerServantName, new Builder().buildConfig());
 			managerServant.setDomain(managerDomain);
 			managerServant.setHandler(new IServantHandler() {
 				@Override

@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 
 import com.lobstar.base.log.XLogger;
 import com.lobstar.base.role.Servant;
-import com.lobstar.config.BuildConfiguration;
+import com.lobstar.config.Builder;
 import com.lobstar.context.ServantContext;
 import com.lobstar.index.QueryTools;
 import com.lobstar.manage.IServantHandler;
@@ -30,11 +30,11 @@ public class ServantMain {
             domain = args[1];
         }
         name = "test";
-        Servant baseServant = null;
+        Servant servant = null;
         try {
-            baseServant = new Servant(name, new BuildConfiguration().buildConfig());
-            baseServant.setDomain(domain);
-            baseServant.setHandler(new IServantHandler() {
+            servant = new Servant(name, new Builder().buildConfig());
+            servant.setDomain(domain);
+            servant.setHandler(new IServantHandler() {
                 @Override
                 public Map<String,Object> doAssignWorks(final ServantContext sc,Map<String, Object> source) {
                     new Thread(){
@@ -54,12 +54,12 @@ public class ServantMain {
                 }
             });
            
-            baseServant.join();
+            servant.work();
             System.out.println("---------->");
         } catch (Exception e) {
         	logger.error("",e);
-            if (baseServant != null) {
-                baseServant.close();
+            if (servant != null) {
+                servant.close();
             }
         }
 

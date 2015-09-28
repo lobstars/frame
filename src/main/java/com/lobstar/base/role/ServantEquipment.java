@@ -2,7 +2,6 @@ package com.lobstar.base.role;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,7 +16,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
 import com.lobstar.base.exception.TaskeeperBuilderException;
-import com.lobstar.config.BuildConfiguration;
 import com.lobstar.config.Builder;
 import com.lobstar.config.Constant;
 
@@ -55,28 +53,15 @@ public class ServantEquipment implements Closeable {
         }
     }
 
-    @SuppressWarnings("resource")
-    public ServantEquipment(String id, BuildConfiguration config) {
-        setId(id);
-        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.sniff", true)
-                .put("cluster.name", config.getEsName()).build();
-        repositoryClient = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(config
-                .getEsHost(), config.getEsPort()));
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(100, 1);
-        zookeeperClient = CuratorFrameworkFactory.newClient(config.getZooHost() + ":" + config.getZooPort(),
-                retryPolicy);
-        zookeeperClient.start();
-    }
     
     public ServantEquipment(String id , Builder builder) {
     	setId(id);
-        Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.sniff", true)
-                .put("cluster.name", builder.getProperties(Builder.INDEX_NAME)).build();
-        repositoryClient = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(builder.getProperties(Builder.INDEX_HOST), Integer.parseInt(builder.getProperties(Builder.INDEX_PORT))));
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(100, 1);
-        zookeeperClient = CuratorFrameworkFactory.newClient(builder.getProperties(Builder.ZOOKEEPER_HOST) + ":" + builder.getProperties(Builder.ZOOKEEPER_PORT),
-                retryPolicy);
-        zookeeperClient.start();
+    	initClients(builder);
+    }
+    
+    public ServantEquipment(String id) throws Exception {
+    	Builder builder = new Builder().buildConfig();
+    	initClients(builder);
     }
     
 
@@ -117,6 +102,17 @@ public class ServantEquipment implements Closeable {
     		}
     	}
         this.id = id;
+    }
+    
+    @SuppressWarnings("resource")
+	private void initClients(Builder builder) {
+    	Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.sniff", true)
+                .put("cluster.name", builder.getProperties(Builder.INDEX_NAME)).build();
+        repositoryClient = new TransportClient(settings).addTransportAddress(new InetSocketTransportAddress(builder.getProperties(Builder.INDEX_HOST), Integer.parseInt(builder.getProperties(Builder.INDEX_PORT))));
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(100, 1);
+        zookeeperClient = CuratorFrameworkFactory.newClient(builder.getProperties(Builder.ZOOKEEPER_HOST) + ":" + builder.getProperties(Builder.ZOOKEEPER_PORT),
+                retryPolicy);
+        zookeeperClient.start();
     }
 
 }

@@ -15,14 +15,14 @@ public class MasterMain {
         } else {
             name = args[0];
         }
-        Master baseParkKeeper = null;
+        Master master = null;
         try {
-            baseParkKeeper = new Master(name, new Builder().buildConfig(),false);
-            baseParkKeeper.tryBeKeeper();
+            master = new Master(name);
+            master.work();
         } catch (Exception e) {
         	e.printStackTrace();
-            if (baseParkKeeper != null) {
-                baseParkKeeper.close();
+            if (master != null) {
+                master.close();
             }
         }
     }

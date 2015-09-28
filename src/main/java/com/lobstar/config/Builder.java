@@ -33,13 +33,13 @@ public class Builder {
 	public Builder buildConfig() throws IOException {
         String file = "taskeeper.yml";
         InputStream stream = null;
-        String basePath = BuildConfiguration.class.getClassLoader().getResource("").getPath();
+        String basePath = Builder.class.getClassLoader().getResource("").getPath();
         File conf = new File(basePath + "/conf/" + file);
         LOG.info("xxx-file: "+conf.getAbsolutePath());
         if (conf.exists()) {
             stream = new FileInputStream(conf);
         } else {
-            stream = BuildConfiguration.class.getClassLoader().getResourceAsStream(file);
+            stream = Builder.class.getClassLoader().getResourceAsStream(file);
         }
         if (stream != null) {
         	properties = new Properties();
