@@ -88,7 +88,11 @@ public class MissionWindow {
 		this.tcpServer = new ServerBootstrap();
 		ServerHandler serverHandler = new ServerHandler();
 		tcpServer.group(parentGroup, childGroup).channel(NioServerSocketChannel.class)
-				.childHandler(serverHandler).option(ChannelOption.SO_KEEPALIVE, true);
+				.childHandler(serverHandler)
+				.option(ChannelOption.SO_KEEPALIVE, true)
+				.option(ChannelOption.SO_TIMEOUT,10000)
+				.option(ChannelOption.SO_BACKLOG, 2048)
+				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000);
 	}
 
 	public MissionWindow(Master master,String host, int port) {

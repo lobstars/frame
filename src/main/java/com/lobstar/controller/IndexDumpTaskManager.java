@@ -10,11 +10,7 @@ import java.util.TimerTask;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.bulk.BulkProcessor.Listener;
 import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
@@ -38,7 +34,7 @@ public class IndexDumpTaskManager extends TimerTask{
 	private static final long ONE_DAY = 86400000;
 	private static final long HOLD_TIME = ONE_DAY;
 	
-	private int remainTime = 35;
+	private int remainTime = 5;
 	
 	
 	public IndexDumpTaskManager(Client client,int remainTime) {

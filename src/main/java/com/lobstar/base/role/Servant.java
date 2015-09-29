@@ -16,6 +16,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
@@ -55,12 +56,12 @@ public class Servant extends ServantEquipment {
 	private IServantHandler handler = new IServantHandler() {
 
 		@Override
-		public Map<String,Object> doAssignWorks(ServantContext sc,
+		public Map<String, Object> doAssignWorks(ServantContext sc,
 				Map<String, Object> source) {
 
 			logger.info(source.toString());
 			Map<String, Object> ret = new HashMap<String, Object>();
-			
+
 			return ret;
 		}
 	};
@@ -79,13 +80,12 @@ public class Servant extends ServantEquipment {
 		init();
 	}
 
-	
-	public Servant(String id,Builder builder) {
+	public Servant(String id, Builder builder) {
 		super(id, builder);
 		initField();
 		init();
 	}
-	
+
 	public Servant(String id) throws Exception {
 		super(id);
 		initField();
@@ -129,11 +129,13 @@ public class Servant extends ServantEquipment {
 				ConnectionState newState) {
 
 			logger.info("zk connection state changed : " + newState);
-			if (newState == ConnectionState.LOST || newState == ConnectionState.RECONNECTED) {
-				while (true) {
-					try {
-						Servant.this.getZookeeperClient()
-								.blockUntilConnected();
+			if (newState == ConnectionState.LOST
+					|| newState == ConnectionState.RECONNECTED) {
+				try {
+					Servant.this.getZookeeperClient().blockUntilConnected();
+					Stat stat = Servant.this.getZookeeperClient().checkExists()
+							.forPath("/workers/" + getId());
+					if (stat == null) {
 						Servant.this
 								.getZookeeperClient()
 								.create()
@@ -143,16 +145,12 @@ public class Servant extends ServantEquipment {
 										"/workers/" + getId(),
 										domain.getBytes(Charset
 												.forName(Constant.GLOBAL_CHARSET)));
-						break;
-
-					} catch (InterruptedException e) {
-						logger.error(
-								"ZKConnectionListener thread interrupted !", e);
-						break;
-					} catch (Exception e) {
-						logger.error("ZKConnectionListener reconnect error !",
-								e);
 					}
+
+				} catch (InterruptedException e) {
+					logger.error("ZKConnectionListener thread interrupted !", e);
+				} catch (Exception e) {
+					logger.error("ZKConnectionListener reconnect error !", e);
 				}
 			}
 		}
@@ -198,7 +196,7 @@ public class Servant extends ServantEquipment {
 					SearchHit searchHit = queue.take();
 					handleExecutor.execute(new DealWorkThread(searchHit));
 				} catch (Exception e) {
-					logger.error("unhandle exception",e);
+					logger.error("unhandle exception", e);
 				}
 			}
 		}
@@ -222,35 +220,32 @@ public class Servant extends ServantEquipment {
 				sct.setMap(map);
 				sct.setSearchHit(searchHit);
 				Long nowTime = System.currentTimeMillis();
-				Object visitTimeObj = data
-						.get(Constant.VISITOR_TIME_SYMBOL);
+				Object visitTimeObj = data.get(Constant.VISITOR_TIME_SYMBOL);
 				Long visitTime = nowTime + 1;
 				if (visitTimeObj != null) {
-					String visitTimeStr = data.get(
-							Constant.VISITOR_TIME_SYMBOL).toString();
+					String visitTimeStr = data
+							.get(Constant.VISITOR_TIME_SYMBOL).toString();
 					visitTime = Long.parseLong(visitTimeStr);
 				}
 				Long timeSpan = nowTime - visitTime;
 				try {
 					if (data.get("__testConnect") != null) {
-//						map.put(Constant.WORK_DONE_SYMBOL, "true");
-//						map.put(Constant.WORK_RESPONSE_SYMBOL, "success");
-//						map.put(Constant.WORK_TIME_SPAN, timeSpan);
+						// map.put(Constant.WORK_DONE_SYMBOL, "true");
+						// map.put(Constant.WORK_RESPONSE_SYMBOL, "success");
+						// map.put(Constant.WORK_TIME_SPAN, timeSpan);
 					} else {
 
-						Object timeout = data
-								.get(Constant.WORK_TIMEOUT_IGNORE);
+						Object timeout = data.get(Constant.WORK_TIMEOUT_IGNORE);
 
 						// 无超时机制
 						if (timeout != null
-								&& "true"
-										.equals(data
-												.get(Constant.WORK_TIMEOUT_IGNORE))) {
+								&& "true".equals(data
+										.get(Constant.WORK_TIMEOUT_IGNORE))) {
 							Object ret = handler.doAssignWorks(sct, data);
 							map.put(Constant.WORK_DONE_SYMBOL, "true");
-							if(!"true".equals(data.get(Constant.WORK_RESPONSE_IGNORE))) {
-								map.put(Constant.WORK_RESPONSE_SYMBOL,
-										ret);									
+							if (!"true".equals(data
+									.get(Constant.WORK_RESPONSE_IGNORE))) {
+								map.put(Constant.WORK_RESPONSE_SYMBOL, ret);
 							}
 						} else {
 
@@ -267,13 +262,12 @@ public class Servant extends ServantEquipment {
 							if (timeSpan <= threshold) {
 								Object ret = handler.doAssignWorks(sct, data);
 								map.put(Constant.WORK_DONE_SYMBOL, "true");
-								if(!"true".equals(data.get(Constant.WORK_RESPONSE_IGNORE))) {
-									map.put(Constant.WORK_RESPONSE_SYMBOL,
-											ret);									
+								if (!"true".equals(data
+										.get(Constant.WORK_RESPONSE_IGNORE))) {
+									map.put(Constant.WORK_RESPONSE_SYMBOL, ret);
 								}
 							} else {
-								map.put(Constant.WORK_DONE_SYMBOL,
-										"error");
+								map.put(Constant.WORK_DONE_SYMBOL, "error");
 							}
 						}
 						map.put(Constant.WORK_TIME_SPAN, timeSpan);
@@ -281,8 +275,8 @@ public class Servant extends ServantEquipment {
 
 				} catch (Exception e) {
 					map.put(Constant.WORK_DONE_SYMBOL, "error");
-//					map.put(Constant.WORK_RESPONSE_SYMBOL, "name:"
-//							+ getId() + ";get exception:" + e.getMessage());
+					// map.put(Constant.WORK_RESPONSE_SYMBOL, "name:"
+					// + getId() + ";get exception:" + e.getMessage());
 					map.put(Constant.WORK_EXCEPTION, e.getMessage());
 					map.put(Constant.WORK_EXCEPTION_STACK,
 							ExceptionTools.getExceptionStack(e));

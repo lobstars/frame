@@ -462,8 +462,14 @@ public class Master extends ServantEquipment {
 			logger.info(Utils.contact("taskeeper -> zookeeper log dir:",builder.getProperties(Builder.ZOOKEEPER_LOGDIR)));
 			if(!snapDir.exists()) {
 				snapDir.mkdirs();
+			}else {
+				snapDir.deleteOnExit();
+				snapDir.mkdirs();
 			}
 			if(!logDir.exists()) {
+				logDir.mkdirs();
+			}else {
+				logDir.deleteOnExit();
 				logDir.mkdirs();
 			}
 			int tickTime = 1000;
