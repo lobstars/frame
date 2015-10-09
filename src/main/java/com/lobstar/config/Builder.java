@@ -11,21 +11,21 @@ import org.slf4j.Logger;
 import com.lobstar.base.log.XLogger;
 
 public class Builder {
-	public static final String ZOOKEEPER_HOST = "taskeeper.zookeeper.host";
-	public static final String ZOOKEEPER_SNAPDIR = "taskeeper.zookeeper.snapDir";
-	public static final String ZOOKEEPER_LOGDIR = "taskeeper.zookeeper.logDir";
-	public static final String ZOOKEEPER_TICK = "taskeeper.zookeeper.tick";
-	public static final String ZOOKEEPER_PORT = "taskeeper.zookeeper.port";
+	public static final String ZOOKEEPER_HOST = "zookeeper.host";
+	public static final String ZOOKEEPER_SNAPDIR = "zookeeper.snapDir";
+	public static final String ZOOKEEPER_LOGDIR = "zookeeper.logDir";
+	public static final String ZOOKEEPER_TICK = "zookeeper.tick";
+	public static final String ZOOKEEPER_PORT = "zookeeper.port";
 	
-	public static final String INDEX_HOST = "taskeeper.index.host";
-	public static final String INDEX_PORT = "taskeeper.index.port";
-	public static final String INDEX_NAME = "taskeeper.index.cluster.name";
-	public static final String INDEX_REPLICAS = "taskeeper.index.replicas";
+	public static final String INDEX_HOST = "index.host";
+	public static final String INDEX_PORT = "index.port";
+	public static final String INDEX_NAME = "index.cluster.name";
+	public static final String INDEX_REPLICAS = "index.replicas";
 	
-	public static final String WINDOW_HOST = "taskeeper.window.host";
-	public static final String WINDOW_PORT = "taskeeper.window.port";
+	public static final String WINDOW_HOST = "window.host";
+	public static final String WINDOW_PORT = "window.port";
 	
-	public static final String WORK_REMAIN_TIME = "taskeeper.work_remain_time";
+	public static final String WORK_REMAIN_TIME = "work_remain_time";
 	private static Logger LOG = XLogger.getLogger(Builder.class);
 	
 	private Properties properties;

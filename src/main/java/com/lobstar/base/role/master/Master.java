@@ -49,6 +49,7 @@ import com.lobstar.controller.IndexDumpTaskManager;
 import com.lobstar.index.QueryTools;
 import com.lobstar.manage.IDistributionHandler;
 import com.lobstar.manage.IKeeperHandler;
+import com.lobstar.manage.impl.DefaultDistributionHandler;
 import com.lobstar.queryer.QueryGenerator;
 import com.lobstar.utils.Utils;
 
@@ -85,42 +86,7 @@ public class Master extends ServantEquipment {
 	private ScheduledExecutorService poolExecutor = (ScheduledThreadPoolExecutor) Executors
 			.newScheduledThreadPool(1);
 
-	private IDistributionHandler distributionHandler = new IDistributionHandler() {
-
-		@Override
-		public String distribution(Map<String, Object> source,
-				CopyOnWriteArrayList<String> workerSet,
-				Map<String, CopyOnWriteArrayList<String>> domainWorkerMap) {
-			if (source != null) {
-				Object domain = source.get(Constant.WORK_DOMAIN_SYMBOL);
-				 Object workName = source.get(Constant.WORK_SERVANT_NAME);
-	                if(workName != null) {
-	                	String name = workName.toString();
-	                	for (String worker : workerSet) {
-							if(name.equals(worker)) {
-								return worker;
-							}
-						}
-	                }
-				if (domain != null) {
-					if (domainWorkerMap.containsKey(domain)
-							&& domainWorkerMap.get(domain).size() > 0) {
-						int label = Math
-								.abs(source.hashCode() % domainWorkerMap.get(domain).size());
-						String type = domainWorkerMap.get(domain).get(label);
-						return type;
-					}
-				}
-			}
-			CopyOnWriteArrayList<String> customServants = domainWorkerMap.get(Constant.WORK_CUSTOM_DOMAIN_DEFALUT);
-			if(customServants != null) {
-				int label = Math.abs(source.hashCode() % domainWorkerMap.get(Constant.WORK_CUSTOM_DOMAIN_DEFALUT).size());
-				String type = domainWorkerMap.get(Constant.WORK_CUSTOM_DOMAIN_DEFALUT).get(label);
-				return type;				
-			}
-			return null;
-		}
-	};
+	private IDistributionHandler distributionHandler = new DefaultDistributionHandler();
 
 	private IKeeperHandler handler = new IKeeperHandler() {
 		@Override

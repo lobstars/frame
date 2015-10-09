@@ -10,55 +10,37 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.lucene.index.SegmentInfos.FindSegmentsFile;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import com.lobstar.base.gateway.NettyGateWay;
 import com.lobstar.base.gateway.ParkGateWay;
 import com.lobstar.base.role.Mission;
+import com.lobstar.base.role.MissionReport;
 import com.lobstar.manage.IWorkerListener;
 
 public class VisitorMain {
 
     public static void main(String[] args) throws Exception {
-    	
-    	ExecutorService pool = Executors.newFixedThreadPool(200);
-        
-
-        //        while (true) {
-        for (int i = 0; i <10000; i++) {
-//        	if(i%20 == 0) {
-//        		Thread.sleep(20);
-//        	}
-//        	if(i%35 == 0) {
-//        		Thread.sleep(50);
-//        	}
-        	Map<String, Object> data = new HashMap<String, Object>();
             List<String> param = new ArrayList<String>();
             param.add("p1");
             param.add("p3");
-            data.put("symbol", "0053");
-            data.put("code", "1111");
-            data.put("action","send");
-            data.put("_domain", "_status");
-            data.put("temp_params", param);
-            Mission visitor = new Mission("127.0.0.1", 10888);
-            visitor.setData(data);
-            //System.out.println("send "+index);
-            final long timeMillis1 = System.currentTimeMillis();
+           
             try {
-            	visitor.submit();
-            } catch (InterruptedException e) {
+            	 MissionReport report = new Mission("115.28.9.13", 10888)
+         		.addParam("symbol", "test")
+         		.addParam("code", "1111")
+         		.addParam("action", "send")
+         		.addParam("temp_params", param)
+         		.addParam("phone", "111")
+         		.submit().reportGet();
+            	 if(report.isError()) {
+            		 System.out.println(report.getException());
+            	 }else {
+            		 System.out.println(report.getResult());            		 
+            	 }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-            visitor.getResponse(100, 500, new IWorkerListener<Mission>() {
-				@Override
-				public void responseVisitor(Mission visitor, Object ret) {
-					Map<String,Object> object = (Map<String, Object>) ret;
-					System.out.println(object.get("_wait_time"));
-				}
-			});
-        }
-        Thread.sleep(5000);
-        pool.shutdown();
     }
 
     class Task implements Runnable {

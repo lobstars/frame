@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import com.lobstar.config.Constant;
 import com.lobstar.index.QueryTools;
 import com.lobstar.manage.IDistributionHandlerInNetty;
+import com.lobstar.manage.impl.DefaultDistributionHandlerInNetty;
 import com.lobstar.utils.Utils;
 
 public class MissionWindow {
@@ -44,42 +45,7 @@ public class MissionWindow {
 	private Map<String, CopyOnWriteArrayList<String>> domainWorkerMap = ServantGroup
 			.getDomainWorkerMap();
 
-	private IDistributionHandlerInNetty distributionHandlerInNetty = new IDistributionHandlerInNetty() {
-
-		@Override
-		public String distribution(Map<String, Object> source,
-				CopyOnWriteArrayList<String> workerSet,
-				Map<String, CopyOnWriteArrayList<String>> domainWorkerMap) {
-			if (source != null) {
-				Object domain = source.get(Constant.WORK_DOMAIN_SYMBOL);
-				 Object workName = source.get(Constant.WORK_SERVANT_NAME);
-	                if(workName != null) {
-	                	String name = workName.toString();
-	                	for (String worker : workerSet) {
-							if(name.equals(worker)) {
-								return worker;
-							}
-						}
-	                }
-				if (domain != null) {
-					if (domainWorkerMap.containsKey(domain)
-							&& domainWorkerMap.get(domain).size() > 0) {
-						int label = Math
-								.abs(source.hashCode() % domainWorkerMap.get(domain).size());
-						String type = domainWorkerMap.get(domain).get(label);
-						return type;
-					}
-				}
-			}
-			CopyOnWriteArrayList<String> customServants = domainWorkerMap.get(Constant.WORK_CUSTOM_DOMAIN_DEFALUT);
-			if(customServants != null) {
-				int label = Math.abs(source.hashCode() % domainWorkerMap.get(Constant.WORK_CUSTOM_DOMAIN_DEFALUT).size());
-				String type = domainWorkerMap.get(Constant.WORK_CUSTOM_DOMAIN_DEFALUT).get(label);
-				return type;				
-			}
-			return null;
-		}
-	};
+	private IDistributionHandlerInNetty distributionHandlerInNetty = new DefaultDistributionHandlerInNetty();
 
 	public MissionWindow() {
 		EventLoopGroup parentGroup = new NioEventLoopGroup(
@@ -89,7 +55,8 @@ public class MissionWindow {
 		ServerHandler serverHandler = new ServerHandler();
 		tcpServer.group(parentGroup, childGroup).channel(NioServerSocketChannel.class)
 				.childHandler(serverHandler)
-				.option(ChannelOption.SO_KEEPALIVE, true)
+				//短连接？
+				.option(ChannelOption.SO_KEEPALIVE, false)
 				.option(ChannelOption.SO_TIMEOUT,10000)
 				.option(ChannelOption.SO_BACKLOG, 2048)
 				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000);
@@ -145,10 +112,8 @@ public class MissionWindow {
 					ret.put(Constant.WORK_RESPONSE_SYMBOL, string);
 					response = objectMapper.writeValueAsString(ret).getBytes();
 				}else {
-//					synchronized (MissionWindow.this) {
-						type = distributionHandlerInNetty
-								.distribution(data, workerSet, domainWorkerMap);						
-//					}
+					type = distributionHandlerInNetty
+							.distribution(data, workerSet, domainWorkerMap);						
 					if (type != null) {
 						String index = QueryTools.getDailyIndex();
 						String id = addTask(index, type, data);

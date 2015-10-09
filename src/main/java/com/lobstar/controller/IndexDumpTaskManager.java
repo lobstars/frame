@@ -130,7 +130,9 @@ public class IndexDumpTaskManager extends TimerTask{
 		
 		Long now = Utils.getSystemTime();
 		Long targetTime = getDeleteTimeLine(now);
-		String cmd = Utils.contact(Constant.VISITOR_TIME_SYMBOL,"=",targetTime);
+		logger.info(Utils.contact("compute time to remove: ",new Date(targetTime)));
+		String cmd = Utils.contact(Constant.VISITOR_TIME_SYMBOL,"<=",targetTime);
+		logger.info(Utils.contact("delete index use cmd",cmd));
 		SearchResponse response = client.prepareSearch(Constant.DUMP_INDEX_NAME).setQuery(QueryGenerator.generateQuery(cmd))
 		.setScroll(new TimeValue(60000))
 		.setSearchType(SearchType.SCAN)
