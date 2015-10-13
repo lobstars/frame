@@ -14,33 +14,50 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import com.lobstar.base.gateway.NettyGateWay;
 import com.lobstar.base.gateway.ParkGateWay;
-import com.lobstar.base.role.Mission;
-import com.lobstar.base.role.MissionReport;
+import com.lobstar.base.role.mission.Mission;
+import com.lobstar.base.role.mission.MissionReport;
 import com.lobstar.manage.IWorkerListener;
 
 public class VisitorMain {
 
     public static void main(String[] args) throws Exception {
-            List<String> param = new ArrayList<String>();
-            param.add("p1");
-            param.add("p3");
+    	for(int i=0;i< 1;i++) {
+    		new Thread(){
+    			public void run() {
+    				System.out.println("go");
+    				List<String> param = new ArrayList<String>();
+    	             param.add("p1");
+    	             param.add("p3");
+    	         	   try {
+    	               	 MissionReport report = new Mission("115.28.9.13", 10888)
+    	            		.addParam("symbol", "test")
+    	            		.addParam("code", "1111")
+    	            		.addParam("action", "send")
+    	            		.addParam("temp_params", param)
+    	            		.addParam("phone", System.currentTimeMillis())
+    	            		//.setAsync(true)
+    	            		.submit().reportGet().getAsyncReport();
+    	               	 if(report.isError()) {
+    	               		 System.out.println(report.getException());
+    	               	 }else {
+    	               		 System.out.println(report.getResult());     
+    	               		 System.out.println(report.getAsyncResult());
+    	               	 }
+    	               	 
+    	               	Thread.sleep(10000);
+    	               	System.out.println(report.getAsyncReport()
+								.getAsyncResult());
+    	               } catch (Exception e) {
+    	                   e.printStackTrace();
+    	               }
+    	         	  
+    	         	   
+    			}
+    		}.start();
+    		 
+             
+    	}
            
-            try {
-            	 MissionReport report = new Mission("115.28.9.13", 10888)
-         		.addParam("symbol", "test")
-         		.addParam("code", "1111")
-         		.addParam("action", "send")
-         		.addParam("temp_params", param)
-         		.addParam("phone", "111")
-         		.submit().reportGet();
-            	 if(report.isError()) {
-            		 System.out.println(report.getException());
-            	 }else {
-            		 System.out.println(report.getResult());            		 
-            	 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
     }
 
     class Task implements Runnable {

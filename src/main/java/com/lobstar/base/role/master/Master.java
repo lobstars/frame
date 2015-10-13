@@ -60,6 +60,7 @@ public class Master extends ServantEquipment {
 	private static final String MASTER_SYBOL = "/master";
 	private LeaderSelector leaderSelector;
 	private BroadcastQueue broadcastQueue;
+	private Builder builder;
 
 	private CopyOnWriteArrayList<String> workerSet = ServantGroup
 			.getWorkerSet();
@@ -69,7 +70,8 @@ public class Master extends ServantEquipment {
 
 	private MissionWindow ticketWindow;
 
-	private long tickTime = 3;
+	private long taskSeekTick = 3;
+	private long indexBuildTick = 3;
 	//
 	private int searchNum = Constant.MASTER_POLL_INTERVAL;
 
@@ -81,7 +83,6 @@ public class Master extends ServantEquipment {
 	
 	private int indexReplicas = 0;
 	
-	private int remainTime = 35;
 
 	private ScheduledExecutorService poolExecutor = (ScheduledThreadPoolExecutor) Executors
 			.newScheduledThreadPool(1);
@@ -278,12 +279,12 @@ public class Master extends ServantEquipment {
 							throws Exception {
 						handler.takeLeadership(client);
 						poolExecutor.scheduleWithFixedDelay(new SeekWork(), 0,
-								tickTime, TimeUnit.SECONDS);
+								taskSeekTick, TimeUnit.SECONDS);
 						poolExecutor.scheduleWithFixedDelay(
-								new IndexBuilderTimer(), 0, tickTime,
+								new IndexBuilderTimer(), 0, indexBuildTick,
 								TimeUnit.HOURS);
 						dumpTimer.schedule(new IndexDumpTaskManager(
-								getRepositoryClient(),remainTime), findDumpDate(),
+								getRepositoryClient(),builder), findDumpDate(),
 								1000 * 60 * 60 * 24);
 						try {
 							closeLatch.await();
@@ -421,6 +422,8 @@ public class Master extends ServantEquipment {
 	}
 	
 	private void initMaster(Builder builder,boolean candidate) throws Exception {
+		this.builder = builder;
+		loadConfig();
 		if(!candidate) {
 			File snapDir = new File(builder.getProperties(Builder.ZOOKEEPER_SNAPDIR));
 			File logDir = new File(builder.getProperties(Builder.ZOOKEEPER_LOGDIR));
@@ -462,11 +465,7 @@ public class Master extends ServantEquipment {
 		if(builder.getProperties(Builder.INDEX_REPLICAS) != null) {
 			this.indexReplicas = Integer.parseInt(builder.getProperties(Builder.INDEX_REPLICAS));
 		}
-		 logger.info(Utils.contact("taskeeper -> index replicas: ",this.indexReplicas));
-		if(builder.getProperties(Builder.WORK_REMAIN_TIME) != null) {
-			this.remainTime = Integer.parseInt(builder.getProperties(Builder.WORK_REMAIN_TIME));
-		}
-		logger.info(Utils.contact("taskeeper -> index remian days: ",this.remainTime));
+		logger.info(Utils.contact("taskeeper -> index replicas: ",this.indexReplicas));
         Settings settings = ImmutableSettings.settingsBuilder().put("client.transport.sniff", true)
                 .put("cluster.name", builder.getProperties(Builder.INDEX_NAME)).build();
         logger.info(Utils.contact("taskeeper -> index cluster name: ",builder.getProperties(Builder.INDEX_NAME)));
@@ -476,6 +475,18 @@ public class Master extends ServantEquipment {
         setZookeeperClient(CuratorFrameworkFactory.newClient(builder.getProperties(Builder.ZOOKEEPER_HOST) + ":" + builder.getProperties(Builder.ZOOKEEPER_PORT),
                 retryPolicy));
         getZookeeperClient().start();
+        logger.info("taskeeper -> all client connected");
+        
+	}
+	
+	private void loadConfig() {
+		Builder builder = this.builder;
+		
+		String seekSize = builder.getProperties(Builder.MASTER_SEEK_TASK_SIZE);
+		if(seekSize != null) {
+			this.searchNum = Integer.parseInt(seekSize);
+		}
+		logger.info(Utils.contact("taskeeper -> seek task size ",this.searchNum," one time"));
 	}
 
 	public BroadcastQueue getBroadcastQueue() {

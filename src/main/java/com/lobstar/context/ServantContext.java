@@ -46,6 +46,15 @@ public class ServantContext {
 				searchHit.getIndex(), searchHit.getType(),
 				searchHit.getId(), resp);
 	}
+	
+	public void updateException(Exception e) {
+		Map<String,Object> resp = new HashMap<String, Object>();
+		resp.put(Constant.WORK_EXCEPTION, e.getMessage());
+		resp.put(Constant.WORK_DONE_SYMBOL, "error");
+		QueryTools.updateIndexData(client,
+				searchHit.getIndex(), searchHit.getType(),
+				searchHit.getId(), resp);
+	}
 
 	public SearchHit getSearchHit() {
 		return searchHit;

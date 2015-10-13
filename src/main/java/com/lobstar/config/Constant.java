@@ -27,6 +27,8 @@ public class Constant {
 
     public final static String WORK_RESPONSE_SYMBOL = "_return";
     
+    public final static String WORK_ASYNC_SYMBOL = "_async";
+    
     public final static String WORK_RESPONSE_ASYNC_SYMBOL = "_async_return";
     
     public final static String WORK_RESPSONSE_ASYNC_TASK_ID = "_async_param_id";

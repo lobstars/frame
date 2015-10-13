@@ -1,4 +1,4 @@
-package com.lobstar.base.role;
+package com.lobstar.base.role.mission;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -56,6 +56,8 @@ public class Mission {
     	initVisitor();
         this.host = host;
         this.port = port;
+        report.setHost(host);
+        report.setPort(port);
     }
     
     public Mission() {
@@ -112,8 +114,9 @@ public class Mission {
         return data;
     }
 
-    public void setData(Map<String, Object> data) {
+    public Mission setData(Map<String, Object> data) {
         this.data = data;
+        return this;
     }
     
     public Mission submit() throws InterruptedException {
@@ -122,6 +125,7 @@ public class Mission {
         }
         data.put(Constant.WORK_ASSIGN_SYMBOL, isAssign);
         data.put(Constant.WORK_DONE_SYMBOL, isDone);
+        data.put(Constant.WORK_ASYNC_SYMBOL, async);
         data.put(Constant.VISITOR_TIMEZONE_SYMBOL, Calendar.getInstance().getTimeZone().getID());
         connect = bootstrap.connect(new InetSocketAddress(host, port)).sync();
         latch = new CountDownLatch(1);
@@ -136,7 +140,6 @@ public class Mission {
     	}
     	close();
     	throw new MissionException("report timeout");
-    	
     }
 
     public void close() {
@@ -270,7 +273,7 @@ public class Mission {
             }
         }
     }
-
+    
 	public String getHost() {
 		return host;
 	}
@@ -295,8 +298,10 @@ public class Mission {
 		return async;
 	}
 
-	public void setAsync(boolean async) {
+	public Mission setAsync(boolean async) {
 		this.async = async;
+		this.report.setAsync(async);
+		return this;
 	}
 
     

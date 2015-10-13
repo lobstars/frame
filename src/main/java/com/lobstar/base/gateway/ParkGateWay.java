@@ -6,7 +6,7 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 
-import com.lobstar.base.role.MissionBase;
+import com.lobstar.base.role.mission.MissionBase;
 import com.lobstar.manage.IWorkerListener;
 
 public class ParkGateWay extends BaseGateWay<MissionBase> {

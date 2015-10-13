@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import com.lobstar.base.exception.TaskeeperRuntimeException;
 import com.lobstar.base.log.XLogger;
 import com.lobstar.base.role.master.Master;
+import com.lobstar.config.Builder;
 import com.lobstar.config.Constant;
 import com.lobstar.index.QueryTools;
 import com.lobstar.queryer.QueryGenerator;
@@ -37,9 +38,13 @@ public class IndexDumpTaskManager extends TimerTask{
 	private int remainTime = 5;
 	
 	
-	public IndexDumpTaskManager(Client client,int remainTime) {
+	public IndexDumpTaskManager(Client client,Builder builder) {
 		this.client = client;
-		this.remainTime = remainTime;
+		String remain = builder.getProperties(Builder.WORK_REMAIN_TIME);
+		if(remain != null) {
+			this.remainTime = Integer.parseInt(remain);
+			logger.info(Utils.contact("taskeeper -> task remain time: ",remain));
+		}
 		initDumpIndex();
 	}
 	

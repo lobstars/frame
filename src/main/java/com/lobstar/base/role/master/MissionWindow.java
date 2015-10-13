@@ -2,6 +2,7 @@ package com.lobstar.base.role.master;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -19,6 +20,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.elasticsearch.client.Client;
+import org.jboss.netty.handler.execution.ExecutionHandler;
+import org.jboss.netty.handler.execution.MemoryAwareThreadPoolExecutor;
+import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +53,7 @@ public class MissionWindow {
 
 	public MissionWindow() {
 		EventLoopGroup parentGroup = new NioEventLoopGroup(
-				Constant.MASTER_TICKET_WINDOW_THREAD_SIZE);
+				2);
 		EventLoopGroup childGroup = new NioEventLoopGroup(Constant.MASTER_TICKET_WINDOW_THREAD_SIZE);
 		this.tcpServer = new ServerBootstrap();
 		ServerHandler serverHandler = new ServerHandler();
@@ -117,7 +121,17 @@ public class MissionWindow {
 					if (type != null) {
 						String index = QueryTools.getDailyIndex();
 						String id = addTask(index, type, data);
-						response = fetchTaskResponse(index, id);					
+						if("true".equals(String.valueOf(data.get(Constant.WORK_ASYNC_SYMBOL)))) {
+							Map<String,Object> asyncResp = new HashMap<String, Object>();
+							Map<String,Object> returnValue = new HashMap<String, Object>();
+							returnValue.put("id", id);
+							returnValue.put("type", type);
+							returnValue.put("index", index);
+							asyncResp.put(Constant.WORK_RESPONSE_SYMBOL, returnValue);
+							response = objectMapper.writeValueAsString(asyncResp).getBytes();
+						}else {
+							response = fetchTaskResponse(index, id);												
+						}
 					}else {
 						Map<String,Object> ret = new HashMap<String, Object>();
 						ret.put(Constant.WORK_EXCEPTION, "no work");

@@ -1,7 +1,7 @@
 package com.lobstar.base.gateway;
 
 import com.lobstar.base.exception.TaskeeperRuntimeException;
-import com.lobstar.base.role.Mission;
+import com.lobstar.base.role.mission.Mission;
 import com.lobstar.manage.IWorkerListener;
 
 public class NettyGateWay{

@@ -32,6 +32,7 @@ import com.lobstar.context.ServantContext;
 import com.lobstar.index.QueryTools;
 import com.lobstar.manage.IServantHandler;
 import com.lobstar.queryer.QueryGenerator;
+import com.lobstar.utils.Utils;
 
 public class Servant extends ServantEquipment {
 
@@ -171,16 +172,12 @@ public class Servant extends ServantEquipment {
 				SearchHit[] hits = response.getHits().getHits();
 
 				for (SearchHit searchHit : hits) {
-					StringBuffer uid = new StringBuffer();
-					uid.append(searchHit.getIndex());
-					uid.append(searchHit.getType());
-					uid.append(searchHit.getId());
-					if (!cacheSet.contains(uid.toString())) {
+					String uid = Utils.contact(searchHit.getIndex(),searchHit.getType(),searchHit.getId());
+					if (!cacheSet.contains(uid)) {
 						queue.offer(searchHit);
-						cacheSet.offer(uid.toString());
+						cacheSet.offer(uid);
 					}
 				}
-
 			} catch (Exception e) {
 				logger.error("", e);
 				throw new TaskeeperRuntimeException(e);
@@ -272,11 +269,9 @@ public class Servant extends ServantEquipment {
 						}
 						map.put(Constant.WORK_TIME_SPAN, timeSpan);
 					}
-
+					
 				} catch (Exception e) {
 					map.put(Constant.WORK_DONE_SYMBOL, "error");
-					// map.put(Constant.WORK_RESPONSE_SYMBOL, "name:"
-					// + getId() + ";get exception:" + e.getMessage());
 					map.put(Constant.WORK_EXCEPTION, e.getMessage());
 					map.put(Constant.WORK_EXCEPTION_STACK,
 							ExceptionTools.getExceptionStack(e));
@@ -302,14 +297,13 @@ public class Servant extends ServantEquipment {
 					logger.error(e.getMessage(), e);
 					throw new TaskeeperRuntimeException(e);
 				} finally {
-					if (cacheSet.size() > 5000) {
+					cacheSet.remove(Utils.contact(searchHit.getIndex(),searchHit.getType(),searchHit.getId()));
+					if(cacheSet.size()>5000) {
+						logger.info(Utils.contact("cacheSet size warning : ",cacheSet.size()));
 						cacheSet.poll();
 					}
-
 				}
-
 			}
-
 		}
 	}
 

@@ -1,4 +1,4 @@
-package com.lobstar.base.role;
+package com.lobstar.base.role.mission;
 
 import java.util.Calendar;
 import java.util.HashMap;

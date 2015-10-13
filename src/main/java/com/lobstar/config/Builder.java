@@ -26,6 +26,8 @@ public class Builder {
 	public static final String WINDOW_PORT = "window.port";
 	
 	public static final String WORK_REMAIN_TIME = "work_remain_time";
+	
+	public static final String MASTER_SEEK_TASK_SIZE = "work_seek_size";
 	private static Logger LOG = XLogger.getLogger(Builder.class);
 	
 	private Properties properties;
